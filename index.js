@@ -2,6 +2,9 @@
 import express from "express"
 import cors from "cors"
 
+// Import des Routes
+import authRoutes from "./routes/auth.js"
+
 const app = express()
 
 // ----- CORS ----- //// 
@@ -15,6 +18,13 @@ app.use(cors(corsOptions));
 
 
 app.use(express.json())
+
+// Appel des routes
+app.use("/api/auth", authRoutes)
+
+
+
+
 
 app.get("/", (req,res) => {
     res.json("hello World")
