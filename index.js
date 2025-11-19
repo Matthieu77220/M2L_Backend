@@ -1,4 +1,4 @@
-// Import dépendances ET fonctionnalitées
+// Import dépendances
 import express from "express"
 import cors from "cors"
 
@@ -19,9 +19,9 @@ app.use(cors(corsOptions));
 
 app.use(express.json())
 
-// Appel des routes
+// ------ Appel des routes ------ //
 app.use("/api/auth", authRoutes)
-
+// rajouter les autres 
 
 
 

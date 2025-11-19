@@ -1,9 +1,11 @@
 import express from "express"
-import addAuth from "../controllers/auth.js"
+import { inscription, connexion, deconnexion } from "../controllers/auth.js"
 
 const router = express.Router()
 
-// test du router -> controllers
-router.get("/test", addAuth)
+// Chemins des routes -> controllers
+router.post("/inscription", inscription)
+router.post("/connexion", connexion)
+router.post("/deconnexion", deconnexion)
 
 export default router
