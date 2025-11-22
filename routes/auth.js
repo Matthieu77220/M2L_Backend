@@ -7,6 +7,6 @@ const router = express.Router()
 router.post("/inscription", inscription)
 router.post("/connexion", connexion)
 router.post("/deconnexion", deconnexion)
-router.post("/suppressionCompte", suppressionCompte)
+router.delete("/suppressionCompte", suppressionCompte)
 
 export default router
