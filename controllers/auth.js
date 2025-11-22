@@ -1,10 +1,12 @@
 import db from "../config/db.js"
+import 'dotenv/config'
 import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken"
 
 // ----- INSCRIPTION ----- //
 export const inscription = (req, res) => {
     const sql = "SELECT * FROM adherent WHERE email = ?"
-    // const {email, password} = req.body
+    const {email, password} = req.body
     // Rajouter autre lors de l'inscription
 
     db.query(sql, email, (err, results) => {
@@ -19,16 +21,16 @@ export const inscription = (req, res) => {
                         if (err) {
                             res.status(500).send("Erreur lors du hashage du password")
                         } else {
-                            // const sqlInscription = "INSERT INTO adherent () VALUES(?,?,?)"
+                            const sqlInscription = "INSERT INTO adherent () VALUES(?,?,?)"
                             // Créer la BDD
 
                             db.query(sqlInscription, [email, hash], (err, results) => {
                                 if (err) {
                                     res.status(500).send("Erreur lors de l'ajout de l'adherent dans la Base De Données")
-                                } else {
-                                    res.send("Adherent ajouté avec succès !")
                                 }
-
+                                // const token = jwt.sign( { id: results.id }, process.env.secretKey, { expiresIn: "3h"} )
+                                res.send("Adherent ajouté avec succès !")
+                                // token
                             })
                         }
                     })
@@ -54,7 +56,9 @@ export const connexion = (req, res) => {
                         res.status(500).send("Erreur lors de la vérification du mot de passe !")
                     } else {
                         if (results) {
+                            // const token = jwt.sign( { id: results.id }, process.env.secretKey, { expiresIn: "3h"} )
                             res.send("Vous êtes connecté")
+                            // token
                         } else {
                             res.send("Mot de passe incorrect")
                         }
