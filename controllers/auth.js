@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken"
 // ----- INSCRIPTION ----- //
 export const inscription = (req, res) => {
     const sql = "SELECT * FROM adherent WHERE email = ?"
-    const {email, password} = req.body
+    const {prenom, nom, email, dateDeNaissance, telephone, password} = req.body
     // Rajouter autre lors de l'inscription
 
     db.query(sql, email, (err, results) => {
@@ -21,10 +21,9 @@ export const inscription = (req, res) => {
                         if (err) {
                             res.status(500).send("Erreur lors du hashage du password")
                         } else {
-                            const sqlInscription = "INSERT INTO adherent () VALUES(?,?,?)"
-                            // Créer la BDD
+                            const sqlInscription = "INSERT INTO adherent (prenom, nom, email, telephone, date_naissance, mot_de_passe) VALUES(?,?,?,?,?,?)"
 
-                            db.query(sqlInscription, [email, hash], (err, results) => {
+                            db.query(sqlInscription, [prenom, nom, email, telephone, dateDeNaissance, hash], (err, results) => {
                                 if (err) {
                                     res.status(500).send("Erreur lors de l'ajout de l'adherent dans la Base De Données")
                                 }
