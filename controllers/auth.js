@@ -28,8 +28,8 @@ export const inscription = (req, res) => {
                                     res.status(500).send("Erreur lors de l'ajout de l'adherent dans la Base De Données")
                                 }
                                 // const token = jwt.sign( { id: results.id }, process.env.secretKey, { expiresIn: "3h"} )
+                                // res.cookie('token', token, { expires: new Date(Date.now() + 86400000), httpOnly: true, secure: false })
                                 res.send("Adherent ajouté avec succès !")
-                                // token
                             })
                         }
                     })
@@ -56,8 +56,8 @@ export const connexion = (req, res) => {
                     } else {
                         if (results) {
                             // const token = jwt.sign( { id: results.id }, process.env.secretKey, { expiresIn: "3h"} )
+                            //res.cookie('token', token, { expires: new Date(Date.now() + 86400000), httpOnly: true, secure: false })
                             res.send("Vous êtes connecté")
-                            // token
                         } else {
                             res.send("Mot de passe incorrect")
                         }
