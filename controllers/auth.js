@@ -102,7 +102,11 @@ export const connexion = (req, res) => {
 
 // ----- DECONNEXION ----- //
 export const deconnexion = (req, res) => {
-
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure : false
+    })
+    res.send("Déconnexion")
 }
 
 // ----- SUPPRESSION ----- //
