@@ -4,6 +4,7 @@ import cors from "cors"
 
 // Import des Routes
 import authRoutes from "./routes/auth.js"
+import statistiqueAdherentRoutes from "./routes/statistiqueAdherent.js"
 
 const app = express()
 
@@ -21,8 +22,8 @@ app.use(express.json())
 
 // ------ Appel des routes ------ //
 app.use("/api/auth", authRoutes)
-// rajouter les autres 
-
+// rajouter les autres routes
+app.use("/api/statistiqueAdherent", statistiqueAdherentRoutes)
 
 
 
