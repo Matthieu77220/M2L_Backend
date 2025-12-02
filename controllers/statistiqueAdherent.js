@@ -59,11 +59,7 @@ export const visualisationMatch = (req, res) => {
         if (err) {
             return res.status(500).send("Erreur lors de l'exécution de la requete SQL.")
         }else {
-            if (results.length == 0) {
-                res.json([{ "message" : "Aucun match n'a été trouvé."}])
-            }else {
-                res.json([results[0]])
-            }
+            res.json([results[0]])
         }
     })
 }
