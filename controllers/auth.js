@@ -5,9 +5,21 @@ import jwt from "jsonwebtoken"
 
 // ----- INSCRIPTION ----- //
 export const inscription = (req, res) => {
-    const sql = "SELECT * FROM adherent WHERE email = ?"
+
     const {prenom, nom, email, dateDeNaissance, telephone, password} = req.body
-    // Rajouter autre lors de l'inscription
+
+    // --- Vérifications des inputs récupéré ---
+    if (!prenom || !nom || !email || !dateDeNaissance || !telephone || password) {
+        return res.status(400).send("Champs manquants !")
+    }
+
+    if (password.length < 8) {
+        return res.status(400).send("Mot de passe trop court !")
+    }
+
+    // --- Préparation de la requete préparée pour Vérifier l'Email ---
+
+    const sql = "SELECT * FROM adherent WHERE email = ? ;"
 
     db.query(sql, email, (err, results) => {
         if (err) {
@@ -17,11 +29,16 @@ export const inscription = (req, res) => {
                 if (email === results[0].email) {
                     res.send("Il existe déjà un adherent possédant le même email !")
                 } else {
+
+                    // --- Hachage du mot de passe ---
                     bcrypt.hash(password, 10, (err, hash) => {
                         if (err) {
                             res.status(500).send("Erreur lors du hashage du password")
                         } else {
-                            const sqlInscription = "INSERT INTO adherent (prenom, nom, email, telephone, date_naissance, mot_de_passe) VALUES(?,?,?,?,?,?)"
+
+                            // --- Préparation de la requete préparée pour Créer le compte ---
+
+                            const sqlInscription = "INSERT INTO adherent (prenom, nom, email, telephone, date_naissance, mot_de_passe) VALUES(?,?,?,?,?,?) ;"
 
                             db.query(sqlInscription, [prenom, nom, email, telephone, dateDeNaissance, hash], (err, results) => {
                                 if (err) {
@@ -42,6 +59,18 @@ export const inscription = (req, res) => {
 // ----- CONNEXION ----- //
 export const connexion = (req, res) => {
     const { email, password } = req.body
+
+    // --- Vérifications des inputs récupéré ---
+    if (!email || !password) {
+        return res.status(400).send("Champs manquants !")
+    }
+
+    if (password.length < 8) {
+        return res.status(400).send("Mot de passe trop court !")
+    }
+
+    // --- Préparation de la requete préparée pour Vérifier l'Email ---
+
     const sql = "SELECT * from adherent WHERE email = ? ;"
 
     db.query(sql, [email, password], (err, results) => {
@@ -49,7 +78,8 @@ export const connexion = (req, res) => {
             res.status(500).send("Erreur lors de la recherche de l'adherent !")
         } else {
             if (email === results[0].email) {
-                // Vérifier si le mdp de l'user == mdp hashé dans la BDD
+                
+                // --- Compare le MDP et le Hashage ---
                 bcrypt.compare(password, results[0].password_hash, (err, results) => {
                     if (err) {
                         res.status(500).send("Erreur lors de la vérification du mot de passe !")
