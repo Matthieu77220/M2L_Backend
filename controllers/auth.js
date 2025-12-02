@@ -111,4 +111,25 @@ export const deconnexion = (req, res) => {
 
 // ----- SUPPRESSION ----- //
 export const suppressionCompte = (req, res) => {
+
+    // --- Récupération du token depuis le cookie ---
+    const getToken = req.cookies['token']
+
+    // --- Décode le jwt pour récupérer l'id de l'adherent
+    const token = jwt.verify(getToken, process.env.secretKey)
+    const id = token.id
+
+    // --- Préparation de la requete préparée pour Vérifier l'Email ---
+    // L’utilisateur peut récupérer ses données des autres tables après avoir delete son compte ??? (à voir)
+    const sql = 'DELETE FROM adherent where id = ?;'
+
+    db.query(sql,[id], (err, results) => {
+        if (err) {
+            res.status(500).send("Erreur lors de l'execution de la requête.")
+        }else if (results.length != 1) {
+            res.status("400").send("Aucun adherent trouvé avec cet id.")
+        }else {
+            res.send("User supprimé avec succès.")
+        }
+    })
 }
