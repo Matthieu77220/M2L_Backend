@@ -67,6 +67,7 @@ CREATE TABLE MATCH (
     id_match INT PRIMARY KEY AUTO_INCREMENT,
     id_reservation INT,
     score VARCHAR(20) NOT NULL,
+    status VARCHAR(10) NOT NULL,
     nb_buts INT NOT NULL,
     nb_victoires INT NOT NULL,
     nb_egalites INT NOT NULL,
