@@ -8,10 +8,16 @@ CREATE TABLE CLUB (
 
 CREATE TABLE UTILISATEUR (
     id_utilisateur INT PRIMARY KEY AUTO_INCREMENT,
-    identifiant VARCHAR(50) UNIQUE,
-    mot_de_passe VARCHAR(255) NOT NULL,
-    est_admin BOOLEAN
-);
+    est_admin BOOLEAN,
+    est_adherent BOOLEAN,
+    est_superadmin BOOLEAN,
+    id_adherent INT,
+    id_admin INT,
+    id_superadmin INT,
+    FOREIGN KEY (id_admin) REFERENCES ADMIN(id_admin),
+    FOREIGN KEY (id_adherent) REFERENCES ADHERENT(id_adherent),
+    FOREIGN KEY (id_superadmin) REFERENCES SUPERADMIN(id_superadmin)
+); 
 
 CREATE TABLE ADHERENT (
     id_adherent INT PRIMARY KEY AUTO_INCREMENT,
@@ -19,10 +25,9 @@ CREATE TABLE ADHERENT (
     nom VARCHAR(50) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     telephone VARCHAR(20) NOT NULL,
-    date_naissance VARCHAR(8) NOT NULL,
+    date_naissance DATE NOT NULL,
     montant_cotisation DECIMAL(10,2),
     mot_de_passe VARCHAR(255) NOT NULL,
-    est_adherent BOOLEAN,
     debut_adhesion DATE,
     fin_adhesion DATE,
     id_utilisateur INT,
@@ -67,4 +72,54 @@ CREATE TABLE MATCH (
     nb_egalites INT NOT NULL,
     nb_defaites INT NOT NULL,
     FOREIGN KEY (id_reservation) REFERENCES RESERVATION(id_reservation)
+);
+
+CREATE TABLE ADMIN (
+    id_admin INT PRIMARY KEY AUTO_INCREMENT,
+    prenom VARCHAR(50) NOT NULL,
+    nom VARCHAR(50) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    telephone VARCHAR(20) NOT NULL,
+    date_naissance DATE NOT NULL,
+    mot_de_passe VARCHAR(255) NOT NULL,
+    id_utilisateur INT,
+    id_club INT,
+    FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id_utilisateur)
+    FOREIGN KEY (id_club) REFERENCES CLUB(id_club)
+);
+
+CREATE TABLE SUPERADMIN (
+    id_superadmin INT PRIMARY KEY AUTO_INCREMENT,
+    email VARCHAR(50) UNIQUE NOT NULL,
+    telephone VARCHAR(20) NOT NULL,
+    mot_de_passe VArCHAR(255) NOT NULL,
+    id_utilisateur INT,
+    FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id_utilisateur)
+);
+
+CREATE TABLE CHASUBLE(
+    id_chasuble INT PRIMARY KEY AUTO_INCREMENT,
+    nb_chasuble INT DEFAULT 100,
+    id_terrain INT,
+    id_club INT,
+    FOREIGN KEY (id_terrain) REFERENCES TERRAIN(id_terrain),
+    FOREIGN KEY(id_club) REFERENCES CLUB(id_club)
+);
+
+CREATE TABLE BALLON(
+    id_ballon INT PRIMARY KEY AUTO_INCREMENT,
+    nb_ballon INT DEFAULT 20,
+    id_terrain INT,
+    id_club INT,
+    FOREIGN KEY (id_terrain) REFERENCES TERRAIN(id_terrain),
+    FOREIGN KEY(id_club) REFERENCES CLUB(id_club)
+);
+
+CREATE TABLE CRAMPON(
+    id_crampon INT PRIMARY KEY AUTO_INCREMENT,
+    nb_crampon INT DEFAULT 100,
+    id_terrain INT,
+    id_club INT,
+    FOREIGN KEY (id_terrain) REFERENCES TERRAIN(id_terrain),
+    FOREIGN KEY(id_club) REFERENCES CLUB(id_club)
 );
