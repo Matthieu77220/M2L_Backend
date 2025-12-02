@@ -24,14 +24,14 @@ export const statistique = (req, res) => {
             return res.status(500).send("Erreur lors de l'exécution de la requete SQL.")
         }else {
             if (results.length == 0 ) { // --- renvoie un JSON si l'adherent n'a fait aucun match ---
-                return res.json({ matchsJoues: 0,
-                                victoires: 0, 
-                                defaites: 0, 
-                                nuls: 0
-                            });
+                return res.json([{ "matchsJoues": 0,
+                                "victoires": 0, 
+                                "defaites": 0, 
+                                "nuls": 0
+                            }]);
 
             }else {
-                return res.json(results[0])
+                return res.json([results[0]])
             }
         }
     })
