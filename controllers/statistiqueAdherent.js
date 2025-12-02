@@ -41,4 +41,29 @@ export const statistique = (req, res) => {
 
 // ----- Visualisation Match ----- //
 export const visualisationMatch = (req, res) => {
+
+    // --- Récupération du token depuis le cookie ---
+    const getToken = req.cookies['token']
+
+    // --- Décode le jwt pour récupérer l'id de l'adherent
+    const token = jwt.verify(getToken, process.env.secretKey)
+    const id = token.id
+
+    const sql = `SELECT r.date_reservation AS , m.score, m.status AS
+                 FROM reservation r
+                 JOIN match m on m.id_reservation = r.id_reservation
+                 JOIN adherent_reservation ad on r.id_reservation = ad.id_reservation
+                 WHERE ad.id_adherent = ? `
+
+    db.query(sql, id, (err, results) => {
+        if (err) {
+            return res.status(500).send("Erreur lors de l'exécution de la requete SQL.")
+        }else {
+            if (results.length == 0) {
+                res.json([{ "message" : "Aucun match n'a été trouvé."}])
+            }else {
+                res.json([results[0]])
+            }
+        }
+    })
 }
