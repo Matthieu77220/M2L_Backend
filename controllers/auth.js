@@ -44,8 +44,8 @@ export const inscription = (req, res) => {
                                 if (err) {
                                     res.status(500).send("Erreur lors de l'ajout de l'adherent dans la Base De Données")
                                 }
-                                // const token = jwt.sign( { id: results.id }, process.env.secretKey, { expiresIn: "3h"} )
-                                // res.cookie('token', token, { expires: new Date(Date.now() + 86400000), httpOnly: true, secure: false })
+                                const token = jwt.sign( { id: results[0].id }, process.env.secretKey, { expiresIn: "24h"} )
+                                res.cookie('token', token, { expires: new Date(Date.now() + 86400000), httpOnly: true, secure: false })
                                 res.send("Adherent ajouté avec succès !")
                             })
                         }
@@ -85,8 +85,8 @@ export const connexion = (req, res) => {
                         res.status(500).send("Erreur lors de la vérification du mot de passe !")
                     } else {
                         if (results) {
-                            // const token = jwt.sign( { id: results.id }, process.env.secretKey, { expiresIn: "3h"} )
-                            //res.cookie('token', token, { expires: new Date(Date.now() + 86400000), httpOnly: true, secure: false })
+                            const token = jwt.sign( { id: results[0].id }, process.env.secretKey, { expiresIn: "24h"} )
+                            res.cookie('token', token, { expires: new Date(Date.now() + 86400000), httpOnly: true, secure: false })
                             res.send("Vous êtes connecté")
                         } else {
                             res.send("Mot de passe incorrect")
