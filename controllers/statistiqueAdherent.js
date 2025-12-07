@@ -20,19 +20,19 @@ export const statistique = (req, res) => {
     
     // --- Requete préparée ---
     db.query(sql, id, (err, results) => {
+
         if (err) {
             return res.status(500).send("Erreur lors de l'exécution de la requete SQL.")
-        }else {
-            if (results.length == 0 ) { // --- renvoie un JSON si l'adherent n'a fait aucun match ---
-                return res.json([{ "matchsJoues": 0,
+        }
+
+        if (results.length === 0) {  // --- renvoie un JSON si l'adherent n'a fait aucun match ---
+            return res.json([{ "matchsJoues": 0,
                                 "victoires": 0, 
                                 "defaites": 0, 
                                 "nuls": 0
                             }]);
-
-            }else {
-                return res.json([results[0]])
-            }
+        }else {
+            return res.json([results[0]])
         }
     })
 
@@ -49,6 +49,7 @@ export const visualisationMatch = (req, res) => {
     const token = jwt.verify(getToken, process.env.secretKey)
     const id = token.id
 
+    // A FAIRE !!!!  apres les AS rennomer selon le map dans le front
     const sql = `SELECT r.date_reservation AS , m.score, m.status AS
                  FROM reservation r
                  JOIN match m on m.id_reservation = r.id_reservation
