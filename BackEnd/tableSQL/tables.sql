@@ -18,9 +18,7 @@ CREATE TABLE ADHERENT (
     mot_de_passe VARCHAR(255) NOT NULL,
     debut_adhesion DATE,
     fin_adhesion DATE,
-    id_utilisateur INT,
     id_club INT,
-    FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id_utilisateur),
     FOREIGN KEY (id_club) REFERENCES CLUB(id_club)
 );
 
