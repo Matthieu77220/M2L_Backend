@@ -6,31 +6,9 @@ CREATE TABLE CLUB (
     email VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE ADMIN (
-    id_admin INT PRIMARY KEY AUTO_INCREMENT,
-    prenom VARCHAR(50) NOT NULL,
-    nom VARCHAR(50) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    telephone VARCHAR(20) NOT NULL,
-    date_naissance DATE NOT NULL,
-    mot_de_passe VARCHAR(255) NOT NULL,
-    id_utilisateur INT,
-    id_club INT,
-    FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id_utilisateur)
-    FOREIGN KEY (id_club) REFERENCES CLUB(id_club)
-);
-
-CREATE TABLE SUPERADMIN (
-    id_superadmin INT PRIMARY KEY AUTO_INCREMENT,
-    email VARCHAR(50) UNIQUE NOT NULL,
-    telephone VARCHAR(20) NOT NULL,
-    mot_de_passe VArCHAR(255) NOT NULL,
-    id_utilisateur INT,
-    FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id_utilisateur)
-);
-
 CREATE TABLE ADHERENT (
     id_adherent INT PRIMARY KEY AUTO_INCREMENT,
+    role VARCHAR(10) NOT NULL,
     prenom VARCHAR(50) NOT NULL,
     nom VARCHAR(50) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
@@ -41,28 +19,15 @@ CREATE TABLE ADHERENT (
     debut_adhesion DATE,
     fin_adhesion DATE,
     id_utilisateur INT,
-    id_club INT
-    FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id_utilisateur)
+    id_club INT,
+    FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id_utilisateur),
     FOREIGN KEY (id_club) REFERENCES CLUB(id_club)
 );
-
-CREATE TABLE UTILISATEUR (
-    id_utilisateur INT PRIMARY KEY AUTO_INCREMENT,
-    est_admin BOOLEAN,
-    est_adherent BOOLEAN,
-    est_superadmin BOOLEAN,
-    id_adherent INT,
-    id_admin INT,
-    id_superadmin INT,
-    FOREIGN KEY (id_admin) REFERENCES ADMIN(id_admin),
-    FOREIGN KEY (id_adherent) REFERENCES ADHERENT(id_adherent),
-    FOREIGN KEY (id_superadmin) REFERENCES SUPERADMIN(id_superadmin)
-); 
 
 CREATE TABLE TERRAIN (
     id_terrain INT PRIMARY KEY AUTO_INCREMENT,
     adresse VARCHAR(255) NOT NULL,
-    id_club INT
+    id_club INT,
     FOREIGN KEY (id_club) REFERENCES CLUB(id_club)
 );
 
@@ -77,7 +42,7 @@ CREATE TABLE RESERVATION (
     FOREIGN KEY (id_terrain) REFERENCES TERRAIN(id_terrain)
 );
 
-CREATE TABLE MATCH (
+CREATE TABLE MATCHS (
     id_match INT PRIMARY KEY AUTO_INCREMENT,
     id_reservation INT,
     score VARCHAR(20) NOT NULL,
