@@ -4,6 +4,7 @@ import cors from "cors"
 
 // Import des Routes
 import authRoutes from "./routes/auth.js"
+import abonnementsRoutes from "./routes/abonnements.js"
 
 const app = express()
 
@@ -21,11 +22,8 @@ app.use(express.json())
 
 // ------ Appel des routes ------ //
 app.use("/api/auth", authRoutes)
+app.use("/api/abonnements", abonnementsRoutes)
 // rajouter les autres 
-
-
-
-
 app.get("/", (req,res) => {
     res.json("hello World")
 })

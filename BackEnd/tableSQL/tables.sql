@@ -17,6 +17,7 @@ CREATE TABLE ADHERENT (
     montant_cotisation DECIMAL(10,2),
     mot_de_passe VARCHAR(255) NOT NULL,
     debut_adhesion DATE,
+    abonnement varchar(10),
     fin_adhesion DATE,
     id_club INT
 );
