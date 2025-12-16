@@ -6,14 +6,14 @@ import jwt from "jsonwebtoken"
 // ----- INSCRIPTION ----- //
 export const inscription = (req, res) => {
 
-    const {prenom, nom, email, dateDeNaissance, telephone, motDePasse} = req.body
+    const { prenom, nom, email, dateDeNaissance, telephone, motDePasse } = req.body
 
     // --- Vérifications des inputs récupéré ---
     if (!prenom || !nom || !email || !dateDeNaissance || !telephone || !motDePasse) {
         return res.status(400).send("Champs manquants !")
     }
 
-    if (motDePasse.length < 8) {
+    if (motDePasse.length < 12) {
         return res.status(400).send("Mot de passe trop court !")
     }
 
@@ -149,7 +149,7 @@ export const suppressionCompte = (req, res) => { // revoir la récupération de 
     const token = jwt.verify(getToken, process.env.secretKey)
     const id = token.id
 
-    // --- Préparation de la requete préparée pour Vérifier l'Email ---
+    // --- Préparation de la requete préparée pour Supprimer le compte ---
     // L’utilisateur peut récupérer ses données des autres tables après avoir delete son compte ??? (à voir)
     const sql = 'DELETE FROM adherent where id = ?;'
 
@@ -161,5 +161,67 @@ export const suppressionCompte = (req, res) => { // revoir la récupération de 
         } else {
             res.send("User supprimé avec succès.")
         }
+    })
+}
+
+// ----- Modifier MDP ----- //
+export const modifierMotDePasse = (req, res) => {
+
+    // Récupération des inputs
+    const { email, oldMotDePasse, newConfirmMotDePasse } = req.body
+
+    if (!newConfirmMotDePasse) {
+        return res.status(400).send("Champs manquants !")
+    }
+
+    if (newConfirmMotDePasse < 12 ) {
+        return res.status(400).send("Mot de passe trop court !")
+    }
+
+    const sql = "SELECT * FROM adherent where email = ?"
+
+    db.query(sql, [email], (err, results) => {
+        if (err) {
+            return res.status(500).send("Erreur lors de la recherche de l'adherent !");
+        }
+
+        if (results.length === 0) {
+            return res.status(404).send("L'email n'existe pas !");
+        }
+
+        const user = results[0]
+
+        // --- Compare le mot de passe ---
+        bcrypt.compare(oldMotDePasse, user.mot_de_passe, (err, match) => {
+
+            if (err) {
+                return res.status(500).send("Erreur lors de la vérification du mot de passe !");
+            }
+
+            if (!match) {
+                return res.status(401).send("Mot de passe incorrect !");
+            }
+
+                // --- Hachage du mot de passe ---
+                bcrypt.hash(newConfirmMotDePasse, 10, (err, hash) => {
+                    if (err) {
+                        res.status(500).send("Erreur lors du hashage du mot de passe")
+                    } else {
+
+                        // --- Préparation de la requete préparée pour Modifier le MDP ---
+                        const sqlAjouteMotDePasse = "UPDATE adherent SET mot_de_passe = ? where email = ?;"
+
+                        db.query(sqlAjouteMotDePasse, [hash, email], (err, results) => {
+
+                            if (err) {
+                                res.status(500).send("Erreur lors de la mise à jour du mot de passe")
+                            }
+
+                            return res.send("Modification réussite avec succès.")
+                        })
+                    }
+                })
+        })
+
     })
 }

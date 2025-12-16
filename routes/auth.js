@@ -1,5 +1,5 @@
 import express from "express"
-import { inscription, connexion, deconnexion, suppressionCompte } from "../controllers/auth.js"
+import { inscription, connexion, deconnexion, suppressionCompte, modifierMotDePasse } from "../controllers/auth.js"
 
 const router = express.Router()
 
@@ -8,5 +8,6 @@ router.post("/inscription", inscription)
 router.post("/connexion", connexion)
 router.post("/deconnexion", deconnexion)
 router.delete("/suppressionCompte", suppressionCompte)
+router.put("/modifierMotDePasse", modifierMotDePasse)
 
 export default router
