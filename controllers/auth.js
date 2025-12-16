@@ -6,14 +6,14 @@ import jwt from "jsonwebtoken"
 // ----- INSCRIPTION ----- //
 export const inscription = (req, res) => {
 
-    const {prenom, nom, email, dateDeNaissance, telephone, password} = req.body
+    const {prenom, nom, email, dateDeNaissance, telephone, motDePasse} = req.body
 
     // --- Vérifications des inputs récupéré ---
-    if (!prenom || !nom || !email || !dateDeNaissance || !telephone || !password) {
+    if (!prenom || !nom || !email || !dateDeNaissance || !telephone || !motDePasse) {
         return res.status(400).send("Champs manquants !")
     }
 
-    if (password.length < 8) {
+    if (motDePasse.length < 8) {
         return res.status(400).send("Mot de passe trop court !")
     }
 
@@ -32,9 +32,9 @@ export const inscription = (req, res) => {
         }
 
         // --- Hachage du mot de passe ---
-        bcrypt.hash(password, 10, (err, hash) => {
+        bcrypt.hash(motDePasse, 10, (err, hash) => {
             if (err) {
-                res.status(500).send("Erreur lors du hashage du password")
+                res.status(500).send("Erreur lors du hashage du mot de passe")
             } else {
 
                 // --- Préparation de la requete préparée pour Créer le compte ---
@@ -49,6 +49,7 @@ export const inscription = (req, res) => {
                     // On récupère dans l'object match la clé insertId | on ne peut pas faire match[0].id_adherent car seulement pour les SELECT
                     const user = match.insertId
 
+                    // ---------------------------- Revoir le cookie pbl ----------------------------------
                     // --- Création du token ---
                     const token = jwt.sign(
                         { id: user, role: "utilisateur" },
@@ -72,14 +73,14 @@ export const inscription = (req, res) => {
 
 // ----- CONNEXION ----- //
 export const connexion = (req, res) => {
-    const { email, password } = req.body
+    const { email, motDePasse } = req.body
 
     // --- Vérifications des inputs récupéré ---
-    if (!email || !password) {
+    if (!email || !motDePasse) {
         return res.status(400).send("Champs manquants !")
     }
 
-    if (password.length < 8) {
+    if (motDePasse.length < 8) {
         return res.status(400).send("Mot de passe trop court !")
     }
 
@@ -100,7 +101,7 @@ export const connexion = (req, res) => {
         const user = results[0];
 
         // --- Compare le mot de passe ---
-        bcrypt.compare(password, user.mot_de_passe, (err, match) => {
+        bcrypt.compare(motDePasse, user.mot_de_passe, (err, match) => {
 
             if (err) {
                 return res.status(500).send("Erreur lors de la vérification du mot de passe !");
@@ -109,7 +110,7 @@ export const connexion = (req, res) => {
             if (!match) {
                 return res.status(401).send("Mot de passe incorrect !");
             }
-
+            // ---------------------------- Revoir le cookie pbl ----------------------------------
             // --- Création du token ---
             const token = jwt.sign(
                 { id: user.id_adherent, role: user.role },
@@ -130,7 +131,7 @@ export const connexion = (req, res) => {
 }
 
 // ----- DECONNEXION ----- //
-export const deconnexion = (req, res) => {
+export const deconnexion = (req, res) => { // revoir la destruction du cookie
     res.clearCookie("token", {
         httpOnly: true,
         secure: false
@@ -139,7 +140,7 @@ export const deconnexion = (req, res) => {
 }
 
 // ----- SUPPRESSION ----- //
-export const suppressionCompte = (req, res) => {
+export const suppressionCompte = (req, res) => { // revoir la récupération de du cookie
 
     // --- Récupération du token depuis le cookie ---
     const getToken = req.cookies['token']

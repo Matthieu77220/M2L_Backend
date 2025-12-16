@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 require('dotenv').config()
-
+// revoir le token
 const cookieJwt = (req, res, next) => {
 
     const token = req.cookies['token']
