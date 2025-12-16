@@ -1,5 +1,5 @@
 import express from "express"
-import { modificationProfile } from "../controllers/auth.js"
+import { modificationProfile } from "../controllers/modifProfil.js"
 
 const router = express.Router()
 

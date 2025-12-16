@@ -4,6 +4,7 @@ import cors from "cors"
 
 // Import des Routes
 import authRoutes from "./routes/auth.js"
+import ModifRoutes from "./routes/modifProfil.js"
 
 const app = express()
 
@@ -21,6 +22,7 @@ app.use(express.json())
 
 // ------ Appel des routes ------ //
 app.use("/api/auth", authRoutes)
+app.use("/api/modifProfil", ModifRoutes)
 // rajouter les autres 
 
 
@@ -31,5 +33,5 @@ app.get("/", (req,res) => {
 })
 
 app.listen(3000, () => {
-    console.log("✅ BDD connectée !!!");
+    console.log("✅ BDD connectée !!! http://localhost:3000");
 } )
