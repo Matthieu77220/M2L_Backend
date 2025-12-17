@@ -19,7 +19,7 @@ export const inscription = (req, res) => {
 
     // --- Préparation de la requete préparée pour Vérifier l'Email ---
 
-    const sql = "SELECT * FROM adherent WHERE email = ? ;"
+    const sql = "SELECT * FROM adherent WHERE email = ?;"
 
     db.query(sql, [email], (err, results) => {
 
