@@ -18,8 +18,15 @@ CREATE TABLE ADHERENT (
     mot_de_passe VARCHAR(255) NOT NULL,
     debut_adhesion DATE,
     fin_adhesion DATE,
-    id_club INT
+    type_abonnement VARCHAR(255)
 );
+
+CREATE TABLE LICENCE (
+    id_licence INT PRIMARY KEY AUTO_INCREMENT,
+    numero_adherent VARCHAR(8),
+    id_adherent INT,
+    FOREIGN KEY (id_adherent) REFERENCES ADHERENT(id_adherent)
+)
 
 CREATE TABLE TERRAIN (
     id_terrain INT PRIMARY KEY AUTO_INCREMENT,
