@@ -60,7 +60,8 @@ export const inscription = (req, res) => {
                     res.cookie("token", token, {
                         httpOnly: true,
                         secure: false,
-                        maxAge: 24 * 60 * 60 * 1000, // 24h
+                        maxAge: 24 * 60 * 60 * 1000,// 24h
+                     $
                     })
 
                     res.send("Adherent ajouté avec succès !")
@@ -79,7 +80,7 @@ export const connexion = (req, res) => {
         return res.status(400).send("Champs manquants !")
     }
 
-    if (motDePasse.length < 8) {
+    if (motDePasse.length < 12) {
         return res.status(400).send("Mot de passe trop court !")
     }
 
@@ -121,9 +122,10 @@ export const connexion = (req, res) => {
             res.cookie("token", token, {
                 httpOnly: true,
                 secure: false,
-                maxAge: 24 * 60 * 60 * 1000, // 24h
-            });
+                maxAge: 24 * 60 * 60 * 1000,//24h
 
+            });
+            
             return res.send("Vous êtes connecté !");
         });
     })
