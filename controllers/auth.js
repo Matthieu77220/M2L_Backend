@@ -6,10 +6,10 @@ import jwt from "jsonwebtoken"
 // ----- INSCRIPTION ----- //
 export const inscription = (req, res) => {
 
-    const {prenom, nom, email, dateDeNaissance, telephone, password} = req.body
+    const {prenom, nom, email, dateDeNaissance, telephone, motDePasse} = req.body
 
     // --- Vérifications des inputs récupéré ---
-    if (!prenom || !nom || !email || !dateDeNaissance || !telephone || !password) {
+    if (!prenom || !nom || !email || !dateDeNaissance || !telephone || !motDePasse) {
         return res.status(400).send("Champs manquants !")
     }
 
@@ -32,9 +32,9 @@ export const inscription = (req, res) => {
         }
 
         // --- Hachage du mot de passe ---
-        bcrypt.hash(password, 10, (err, hash) => {
+        bcrypt.hash(motDePasse, 10, (err, hash) => {
             if (err) {
-                res.status(500).send("Erreur lors du hashage du password")
+                res.status(500).send("Erreur lors du hashage du motDePasse")
             } else {
 
                 // --- Préparation de la requete préparée pour Créer le compte ---
@@ -72,14 +72,14 @@ export const inscription = (req, res) => {
 
 // ----- CONNEXION ----- //
 export const connexion = (req, res) => {
-    const { email, password } = req.body
+    const { email, motDePasse } = req.body
 
     // --- Vérifications des inputs récupéré ---
-    if (!email || !password) {
+    if (!email || !motDePasse) {
         return res.status(400).send("Champs manquants !")
     }
 
-    if (password.length < 8) {
+    if (motDePasse.length < 8) {
         return res.status(400).send("Mot de passe trop court !")
     }
 
@@ -100,7 +100,7 @@ export const connexion = (req, res) => {
         const user = results[0];
 
         // --- Compare le mot de passe ---
-        bcrypt.compare(password, user.mot_de_passe, (err, match) => {
+        bcrypt.compare(motDePasse, user.mot_de_passe, (err, match) => {
 
             if (err) {
                 return res.status(500).send("Erreur lors de la vérification du mot de passe !");
