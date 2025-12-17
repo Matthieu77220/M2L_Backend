@@ -24,6 +24,8 @@ CREATE TABLE ADHERENT (
 CREATE TABLE LICENCE (
     id_licence INT PRIMARY KEY AUTO_INCREMENT,
     numero_adherent VARCHAR(8),
+    debut_licence DATE,
+    fin_licence DATE,
     id_adherent INT,
     FOREIGN KEY (id_adherent) REFERENCES ADHERENT(id_adherent)
 )
