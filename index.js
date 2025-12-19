@@ -4,6 +4,7 @@ import cors from "cors"
 
 // Import des Routes
 import authRoutes from "./routes/auth.js"
+import licenceRoutes from "./routes/licence.js"
 
 const app = express()
 
@@ -22,7 +23,9 @@ app.use(express.json())
 
 // ------ Appel des routes ------ //
 app.use("/api/auth", authRoutes)
+app.use("api/licence", licenceRoutes)
 // rajouter les autres 
+
 
 
 
