@@ -13,7 +13,7 @@ export const identifiantLicence = (req, res) => {
     const id = token.id
 
     // --- Préparation de la requete préparée pour Afficher les informations de la licence ---
-    const sql = `SELECT a.prenom, a.nom, a.date_naissance, a.type_abonnement, l.debut_licence, l.fin_licence
+    const sql = `SELECT a.prenom, a.nom, a.date_naissance, a.type_abonnement, l.numero_adherent, l.debut_licence, l.fin_licence
                  FROM adherent as a
                  JOIN licence as l on l.id_adherent = a.id_adherent
                  WHERE l.id_adherent = ? `
