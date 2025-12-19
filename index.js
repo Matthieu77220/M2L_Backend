@@ -23,7 +23,7 @@ app.use(express.json())
 
 // ------ Appel des routes ------ //
 app.use("/api/auth", authRoutes)
-app.use("api/licence", licenceRoutes)
+app.use("/api/licence", licenceRoutes)
 // rajouter les autres 
 
 
