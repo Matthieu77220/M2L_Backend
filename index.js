@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser"
 // Import des Routes
 import authRoutes from "./routes/auth.js"
 import licenceRoutes from "./routes/licence.js"
+import statistiqueAdherentRoutes from "./routes/statistiqueAdherent.js"
 
 const app = express()
 app.use(cookieParser())
@@ -26,7 +27,8 @@ app.use(express.json())
 // ------ Appel des routes ------ //
 app.use("/api/auth", authRoutes)
 app.use("/api/licence", licenceRoutes)
-// rajouter les autres 
+app.use("/api/statistiqueAdherent", statistiqueAdherentRoutes)
+// rajouter les autres routes
 
 
 
