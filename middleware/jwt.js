@@ -1,25 +1,25 @@
-import jwt from ('jsonwebtoken')
-require('dotenv').config()
+import jwt from "jsonwebtoken"
+import 'dotenv/config'
 
 const cookieJwt = (req, res, next) => {
+  const token = req.cookies.token  
 
-    const token = req.cookies['token']
-
-    console.log(token)
+  if (!token) {
+    return res.status(401).json({ message: "Token manquant" })
+  }
 
     try {
 
-        const user = jwt.verify(token, process.env.SECRET_KEY)
+        const user = jwt.verify(token, process.env.secretKey)
 
         req.user = user
 
-        next();
+        next()
 
     } catch(err) {
-        res.clearCookie("token")
-        return res.redirect("/Connexion")
+        return res.status(401).json({ message: "Token invalide" })
     }
 
 }
 
-module.exports = cookieJwt
+export default cookieJwt
