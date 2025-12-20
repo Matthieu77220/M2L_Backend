@@ -6,6 +6,6 @@ const router = express.Router()
 
 // Chemins des routes -> controllers
 router.get("/statistique", cookieJwt, statistique)
-router.post("/visualisationMatch", cookieJwt, visualisationMatch)
+router.get("/visualisationMatch", cookieJwt, visualisationMatch)
 
 export default router
