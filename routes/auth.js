@@ -9,6 +9,6 @@ router.post("/inscription", inscription)
 router.post("/connexion", connexion)
 router.post("/deconnexion", deconnexion)
 router.delete("/suppressionCompte", cookieJwt , suppressionCompte)
-router.put("/modifierMotDePasse", modifierMotDePasse)
+router.put("/modifierMotDePasse", cookieJwt, modifierMotDePasse)
 
 export default router
