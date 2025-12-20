@@ -61,8 +61,7 @@ export const inscription = (req, res) => {
                         httpOnly: true,
                         secure: false,
                         maxAge: 24 * 60 * 60 * 1000,// 24h
-                     $
-                    })
+                    })         
 
                     res.send("Adherent ajouté avec succès !")
                 })
@@ -143,25 +142,24 @@ export const deconnexion = (req, res) => {
 // ----- SUPPRESSION ----- //
 export const suppressionCompte = (req, res) => {
 
-    // --- Récupération du token depuis le cookie ---
-    const getToken = req.cookies['token']
-
-    // --- Décode le jwt pour récupérer l'id de l'adherent
-    const token = jwt.verify(getToken, process.env.secretKey)
-    const id = token.id
+    // --- Récupération de l'id de l'adherent depuis le middleware ---
+    const id = req.user.id
 
     // --- Préparation de la requete préparée pour Supprimer le compte ---
     // L’utilisateur peut récupérer ses données des autres tables après avoir delete son compte ??? (à voir)
-    const sql = 'DELETE FROM adherent where id = ?;'
+    const sql = 'DELETE FROM adherent where id_adherent = ?;'
 
     db.query(sql, [id], (err, results) => {
         if (err) {
-            res.status(500).send("Erreur lors de l'execution de la requête.")
-        } else if (results.length != 1) {
-            res.status("400").send("Aucun adherent trouvé avec cet id.")
-        } else {
-            res.send("User supprimé avec succès.")
+            return res.status(500).send("Erreur lors de l'execution de la requête.")
         }
+        
+        res.clearCookie("token", {
+          httpOnly: true,
+          secure: false
+        })
+        
+        return res.send("User supprimé avec succès.")
     })
 }
 
