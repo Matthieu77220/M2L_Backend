@@ -4,33 +4,21 @@ import jwt from "jsonwebtoken"
 
 // ----- Statistique ----- //
 export const statistique = (req, res) => {
-
-    // --- Récupération du token depuis le cookie ---
-    const getToken = req.cookies['token']
-
-    // --- Décode le jwt pour récupérer l'id de l'adherent
-    const token = jwt.verify(getToken, process.env.secretKey)
-    const id = token.id
+    
+    // --- Récupération de l'id de l'adherent depuis le middleware ---
+    const id = req.user.id
 
     const sql =  `SELECT COUNT(m.id_match) AS nombreMatch , SUM(m.nb_victoires) AS victoire , SUM(m.nb_defaites) AS defaite , SUM(m.nb_egalites) AS egalite
-                  FROM match as m
+                  FROM matchs as m
                   JOIN reservation r on r.id_reservation = m.id_reservation
                   JOIN adherent_reservation ad on ad.id_reservation =  r.id_reservation 
-                  where adherent_reservation.id_adherent = ? `
+                  where ad.id_adherent = ? `
     
     // --- Requete préparée ---
     db.query(sql, id, (err, results) => {
 
         if (err) {
             return res.status(500).send("Erreur lors de l'exécution de la requete SQL.")
-        }
-
-        if (results.length === 0) {  // --- renvoie un JSON si l'adherent n'a fait aucun match ---
-            return res.json([{ "matchsJoues": 0,
-                                "victoires": 0, 
-                                "defaites": 0, 
-                                "nuls": 0
-                            }]);
         }else {
             return res.json([results[0]])
         }
