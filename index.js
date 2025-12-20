@@ -1,11 +1,13 @@
 // Import dépendances
 import express from "express"
 import cors from "cors"
+import cookieParser from "cookie-parser"
 
 // Import des Routes
 import authRoutes from "./routes/auth.js"
 
 const app = express()
+app.use(cookieParser())
 
 // ----- CORS ----- //// 
 // Options des Control Origin Request Sharing ou CORS
