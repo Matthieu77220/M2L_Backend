@@ -5,12 +5,8 @@ import jwt from "jsonwebtoken"
 // ----- LICENCE ----- //
 export const identifiantLicence = (req, res) => {
 
-    // --- Récupération du token depuis le cookie ---
-    const getToken = req.cookies['token']
-
-    // --- Décode le jwt pour récupérer l'id de l'adherent
-    const token = jwt.verify(getToken, process.env.secretKey)
-    const id = token.id
+    // --- Récupération de l'id de l'adherent depuis le middleware ---
+    const id = req.user.id
 
     // --- Préparation de la requete préparée pour Afficher les informations de la licence ---
     const sql = `SELECT a.prenom, a.nom, a.date_naissance, a.type_abonnement, l.numero_adherent, l.debut_licence, l.fin_licence
