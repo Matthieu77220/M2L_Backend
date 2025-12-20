@@ -1,4 +1,5 @@
 import express from "express"
+import cookieJwt from "../middleware/jwt.js"
 import { inscription, connexion, deconnexion, suppressionCompte, modifierMotDePasse } from "../controllers/auth.js"
 
 const router = express.Router()
@@ -7,7 +8,7 @@ const router = express.Router()
 router.post("/inscription", inscription)
 router.post("/connexion", connexion)
 router.post("/deconnexion", deconnexion)
-router.delete("/suppressionCompte", suppressionCompte)
+router.delete("/suppressionCompte", cookieJwt , suppressionCompte)
 router.put("/modifierMotDePasse", modifierMotDePasse)
 
 export default router
