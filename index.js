@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser"
 import authRoutes from "./routes/auth.js"
 import licenceRoutes from "./routes/licence.js"
 import statistiqueAdherentRoutes from "./routes/statistiqueAdherent.js"
+import superadminRoutes from "./routes/superadmin.js"
 
 const app = express()
 app.use(cookieParser())
@@ -28,7 +29,7 @@ app.use(express.json())
 app.use("/api/auth", authRoutes)
 app.use("/api/licence", licenceRoutes)
 app.use("/api/statistiqueAdherent", statistiqueAdherentRoutes)
-// rajouter les autres routes
+app.use("/api/superadmin", superadminRoutes)
 
 
 
