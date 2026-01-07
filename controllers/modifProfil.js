@@ -24,7 +24,7 @@ export const modificationProfile = (req, res) => {
         const userId = decoded.id
         
       
-        const sql = "UPDATE adherent SET prenom = ?, nom = ?, email = ?, telephone = ? WHERE id = ?"
+        const sql = "UPDATE adherent SET prenom = ?, nom = ?, email = ?, telephone = ? WHERE id_adherent = ?"
         
         db.query(sql, [prenom, nom, email, telephone, userId], (err, results) => {
             if (err) {
