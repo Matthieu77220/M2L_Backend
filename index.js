@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth.js"
 import licenceRoutes from "./routes/licence.js"
 import statistiqueAdherentRoutes from "./routes/statistiqueAdherent.js"
 import superadminRoutes from "./routes/superadmin.js"
+import profileRoutes from "./routes/profile.js"
 
 const app = express()
 app.use(cookieParser())
@@ -30,6 +31,7 @@ app.use("/api/auth", authRoutes)
 app.use("/api/licence", licenceRoutes)
 app.use("/api/statistiqueAdherent", statistiqueAdherentRoutes)
 app.use("/api/superadmin", superadminRoutes)
+app.use("/api/voirProfile", profileRoutes)
 // rajouter les autres routes
 
 
