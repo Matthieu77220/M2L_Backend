@@ -1,5 +1,5 @@
-import db from "../config/db.js"
 import 'dotenv/config'
+import db from "../config/db.js"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 
@@ -125,7 +125,11 @@ export const connexion = (req, res) => {
 
             });
             
-            return res.send("Vous êtes connecté !");
+            return res.json({ 
+                message: "Vous êtes connecté !",
+                role: user.role,
+                id: user.id_adherent
+            });
         });
     })
 }
