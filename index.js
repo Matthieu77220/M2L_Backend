@@ -30,6 +30,7 @@ app.use("/api/auth", authRoutes)
 app.use("/api/licence", licenceRoutes)
 app.use("/api/statistiqueAdherent", statistiqueAdherentRoutes)
 app.use("/api/superadmin", superadminRoutes)
+// rajouter les autres routes
 
 
 
