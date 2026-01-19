@@ -9,13 +9,13 @@ const isAdmin = (req, res, next) => {
     }
 
     try {
-        //MÊME CLÉ QUE DANS jwt.js
-        const user = jwt.verify(token, process.env.SECRET_KEY);
+      
+        const user = jwt.verify(token, process.env.secretKey);
         
         req.user = user;
 
-     
-        if (user.role === "admin" || user.role === "superadmin") {
+ 
+        if (user.role === "admin") {
             next();
         } else {
             return res.status(403).json({ 

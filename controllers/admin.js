@@ -8,9 +8,21 @@ export const getAllUsers = async (req, res) => {
     
     try {
         const [users] = await db.query(
-            'SELECT id, email, admin, created_at FROM users ORDER BY id ASC'
+            `SELECT 
+                id_adherent AS id, 
+                role, 
+                prenom, 
+                nom, 
+                email, 
+                telephone, 
+                date_naissance, 
+                debut_adhesion, 
+                fin_adhesion, 
+                type_abonnement 
+             FROM ADHERENT 
+             ORDER BY id_adherent ASC`
         );
-        console.log(' trouvés:', users.length);
+        console.log('Utilisateurs trouvés:', users.length);
         res.status(200).json(users);
     } catch (error) {
         console.error('Erreur lors de la récupération des utilisateurs:', error);
@@ -25,7 +37,19 @@ export const getUserById = async (req, res) => {
 
     try {
         const [users] = await db.query(
-            'SELECT id, email, admin, created_at FROM users WHERE id = ?',
+            `SELECT 
+                id_adherent AS id, 
+                role, 
+                prenom, 
+                nom, 
+                email, 
+                telephone, 
+                date_naissance, 
+                debut_adhesion, 
+                fin_adhesion, 
+                type_abonnement 
+             FROM ADHERENT 
+             WHERE id_adherent = ?`,
             [id]
         );
 
@@ -42,12 +66,29 @@ export const getUserById = async (req, res) => {
 
 // POST - Créer un nouvel utilisateur
 export const createUser = async (req, res) => {
-    const { email, password, admin } = req.body;
+    const { 
+        role, 
+        prenom, 
+        nom, 
+        email, 
+        telephone, 
+        date_naissance, 
+        mot_de_passe,
+        montant_cotisation,
+        debut_adhesion,
+        fin_adhesion,
+        type_abonnement
+    } = req.body;
+    
     console.log('Route POST /api/admin/users appelée');
 
+    // Seuls les admins et superadmins peuvent créer des utilisateurs
+    if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'superadmin')) {
+        return res.status(403).json({ message: 'Accès interdit' });
+    }
 
-    if (!email || !password) {
-        return res.status(400).json({ message: 'Email et mot de passe requis' });
+    if (!email || !mot_de_passe || !prenom || !nom || !role || !telephone || !date_naissance) {
+        return res.status(400).json({ message: 'Champs requis manquants' });
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -55,18 +96,24 @@ export const createUser = async (req, res) => {
         return res.status(400).json({ message: 'Format d\'email invalide' });
     }
 
-    if (password.length < 12) {
-        return res.status(400).json({ message: 'Le mot de passe doit contenir au moins 8 caractères' });
+    if (mot_de_passe.length < 12) {
+        return res.status(400).json({ message: 'Le mot de passe doit contenir au moins 12 caractères' });
     }
 
-    if (admin !== undefined && admin !== 0 && admin !== 1) {
-        return res.status(400).json({ message: 'Valeur admin invalide' });
+    const rolesValides = ['admin', 'superadmin', 'utilisateur'];
+    if (!rolesValides.includes(role)) {
+        return res.status(400).json({ message: 'Rôle invalide' });
+    }
+
+    // Un admin ne peut créer que des utilisateurs "utilisateur"
+    if (req.user.role === 'admin' && role !== 'utilisateur') {
+        return res.status(403).json({ message: 'Un admin ne peut créer que des utilisateurs simples' });
     }
 
     try {
-    
+     
         const [existingUsers] = await db.query(
-            'SELECT id FROM users WHERE email = ?',
+            'SELECT id_adherent FROM ADHERENT WHERE email = ?',
             [email]
         );
 
@@ -74,13 +121,25 @@ export const createUser = async (req, res) => {
             return res.status(409).json({ message: 'Cet email existe déjà' });
         }
 
-     
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(mot_de_passe, 10);
 
-      
         const [result] = await db.query(
-            'INSERT INTO users (email, password, admin) VALUES (?, ?, ?)',
-            [email, hashedPassword, admin || 0]
+            `INSERT INTO ADHERENT 
+            (role, prenom, nom, email, telephone, date_naissance, mot_de_passe, montant_cotisation, debut_adhesion, fin_adhesion, type_abonnement) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                role, 
+                prenom, 
+                nom, 
+                email, 
+                telephone, 
+                date_naissance, 
+                hashedPassword,
+                montant_cotisation || null,
+                debut_adhesion || null,
+                fin_adhesion || null,
+                type_abonnement || null
+            ]
         );
 
         console.log('Utilisateur créé avec ID:', result.insertId);
@@ -97,25 +156,74 @@ export const createUser = async (req, res) => {
 // PUT - Modifier un utilisateur
 export const updateUser = async (req, res) => {
     const { id } = req.params;
-    const { email, password, admin } = req.body;
+    const { 
+        role, 
+        prenom, 
+        nom, 
+        email, 
+        telephone, 
+        date_naissance, 
+        mot_de_passe,
+        montant_cotisation,
+        debut_adhesion,
+        fin_adhesion,
+        type_abonnement
+    } = req.body;
+    
     console.log('Route PUT /api/admin/users/:id appelée pour id:', id);
+
+    // Seuls les admins et superadmins peuvent modifier des utilisateurs
+    if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'superadmin')) {
+        return res.status(403).json({ message: 'Accès interdit' });
+    }
 
     try {
 
-        const [users] = await db.query('SELECT id FROM users WHERE id = ?', [id]);
+        const [users] = await db.query('SELECT id_adherent, role FROM ADHERENT WHERE id_adherent = ?', [id]);
 
         if (users.length === 0) {
             return res.status(404).json({ message: 'Utilisateur non trouvé' });
         }
 
-    nt
+        const targetUser = users[0];
+
+        // Un admin ne peut modifier que des utilisateurs simples
+        if (req.user.role === 'admin' && targetUser.role !== 'utilisateur') {
+            return res.status(403).json({ message: 'Un admin ne peut modifier que des utilisateurs simples' });
+        }
+
         let updateFields = [];
         let updateValues = [];
 
+        if (role) {
+            const rolesValides = ['admin', 'superadmin', 'utilisateur'];
+            if (!rolesValides.includes(role)) {
+                return res.status(400).json({ message: 'Rôle invalide' });
+            }
+
+            // Un admin ne peut pas promouvoir au rôle admin/superadmin
+            if (req.user.role === 'admin' && role !== 'utilisateur') {
+                return res.status(403).json({ message: 'Un admin ne peut modifier le rôle qu\'en \"utilisateur\"' });
+            }
+
+            updateFields.push('role = ?');
+            updateValues.push(role);
+        }
+
+        if (prenom) {
+            updateFields.push('prenom = ?');
+            updateValues.push(prenom);
+        }
+
+        if (nom) {
+            updateFields.push('nom = ?');
+            updateValues.push(nom);
+        }
+
         if (email) {
-        
+      
             const [existingUsers] = await db.query(
-                'SELECT id FROM users WHERE email = ? AND id != ?',
+                'SELECT id_adherent FROM ADHERENT WHERE email = ? AND id_adherent != ?',
                 [email, id]
             );
 
@@ -127,15 +235,43 @@ export const updateUser = async (req, res) => {
             updateValues.push(email);
         }
 
-        if (password) {
-            const hashedPassword = await bcrypt.hash(password, 10);
-            updateFields.push('password = ?');
+        if (telephone) {
+            updateFields.push('telephone = ?');
+            updateValues.push(telephone);
+        }
+
+        if (date_naissance) {
+            updateFields.push('date_naissance = ?');
+            updateValues.push(date_naissance);
+        }
+
+        if (mot_de_passe) {
+            if (mot_de_passe.length < 8) {
+                return res.status(400).json({ message: 'Le mot de passe doit contenir au moins 8 caractères' });
+            }
+            const hashedPassword = await bcrypt.hash(mot_de_passe, 10);
+            updateFields.push('mot_de_passe = ?');
             updateValues.push(hashedPassword);
         }
 
-        if (admin !== undefined) {
-            updateFields.push('admin = ?');
-            updateValues.push(admin);
+        if (montant_cotisation !== undefined) {
+            updateFields.push('montant_cotisation = ?');
+            updateValues.push(montant_cotisation);
+        }
+
+        if (debut_adhesion !== undefined) {
+            updateFields.push('debut_adhesion = ?');
+            updateValues.push(debut_adhesion);
+        }
+
+        if (fin_adhesion !== undefined) {
+            updateFields.push('fin_adhesion = ?');
+            updateValues.push(fin_adhesion);
+        }
+
+        if (type_abonnement !== undefined) {
+            updateFields.push('type_abonnement = ?');
+            updateValues.push(type_abonnement);
         }
 
         if (updateFields.length === 0) {
@@ -145,7 +281,7 @@ export const updateUser = async (req, res) => {
         updateValues.push(id);
 
         await db.query(
-            `UPDATE users SET ${updateFields.join(', ')} WHERE id = ?`,
+            `UPDATE ADHERENT SET ${updateFields.join(', ')} WHERE id_adherent = ?`,
             updateValues
         );
 
@@ -163,14 +299,33 @@ export const deleteUser = async (req, res) => {
     console.log('Route DELETE /api/admin/users/:id appelée pour id:', id);
 
     try {
-        //message d'erreur si l'admin veut se supprimer lui meme
+     
+        // Seuls les admins et superadmins peuvent supprimer
+        if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'superadmin')) {
+            return res.status(403).json({ message: 'Accès interdit' });
+        }
+
+        // Un utilisateur ne peut pas se supprimer lui-même
         if (req.user.id === parseInt(id)) {
             return res.status(403).json({ 
                 message: 'Vous ne pouvez pas supprimer votre propre compte' 
             });
         }
 
-        const [result] = await db.query('DELETE FROM users WHERE id = ?', [id]);
+        const [users] = await db.query('SELECT role FROM ADHERENT WHERE id_adherent = ?', [id]);
+
+        if (users.length === 0) {
+            return res.status(404).json({ message: 'Utilisateur non trouvé' });
+        }
+
+        const targetUser = users[0];
+
+        // Un admin ne peut supprimer que des utilisateurs simples
+        if (req.user.role === 'admin' && targetUser.role !== 'utilisateur') {
+            return res.status(403).json({ message: 'Un admin ne peut supprimer que des utilisateurs simples' });
+        }
+
+        const [result] = await db.query('DELETE FROM ADHERENT WHERE id_adherent = ?', [id]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: 'Utilisateur non trouvé' });
