@@ -63,7 +63,12 @@ export const inscription = (req, res) => {
                         maxAge: 24 * 60 * 60 * 1000,// 24h
                     })         
 
-                    res.send("Adherent ajouté avec succès !")
+                    // Renvoie l'ID et le rôle pour que le frontend puisse les stocker
+                    return res.json({
+                        message: "Adherent ajouté avec succès !",
+                        id: user,
+                        role: "utilisateur"
+                    })
                 })
             }
         })
