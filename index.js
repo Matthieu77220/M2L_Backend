@@ -10,6 +10,7 @@ import statistiqueAdherentRoutes from "./routes/statistiqueAdherent.js"
 import superadminRoutes from "./routes/superadmin.js"
 import profileRoutes from "./routes/profile.js"
 import abonnementsRoutes from "./routes/abonnements.js"
+import ModifRoutes from "./routes/modifProfil.js"
 
 const app = express()
 app.use(cookieParser())
@@ -24,6 +25,7 @@ const corsOptions = {
 }
 app.use(cors(corsOptions));
 
+app.use(cookieParser());
 
 app.use(express.json())
 
@@ -33,6 +35,7 @@ app.use("/api/licence", licenceRoutes)
 app.use("/api/statistiqueAdherent", statistiqueAdherentRoutes)
 app.use("/api/superadmin", superadminRoutes)
 app.use("/api/voirProfile", profileRoutes)
+app.use("/api/modifProfil", ModifRoutes)
 // rajouter les autres routes
 
 
@@ -46,5 +49,5 @@ app.get("/", (req,res) => {
 })
 
 app.listen(3000, () => {
-    console.log("✅ BDD connectée !!!");
+    console.log("✅ BDD connectée !!! http://localhost:3000");
 } )

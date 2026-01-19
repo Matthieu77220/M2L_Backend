@@ -11,4 +11,5 @@ router.post("/deconnexion", deconnexion)
 router.delete("/suppressionCompte", cookieJwt , suppressionCompte)
 router.put("/modifierMotDePasse", cookieJwt, modifierMotDePasse)
 
+
 export default router
