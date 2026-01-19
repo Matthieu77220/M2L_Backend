@@ -9,6 +9,7 @@ import licenceRoutes from "./routes/licence.js"
 import statistiqueAdherentRoutes from "./routes/statistiqueAdherent.js"
 import superadminRoutes from "./routes/superadmin.js"
 import profileRoutes from "./routes/profile.js"
+import abonnementsRoutes from "./routes/abonnements.js"
 
 const app = express()
 app.use(cookieParser())
@@ -38,6 +39,8 @@ app.use("/api/voirProfile", profileRoutes)
 
 
 
+app.use("/api/abonnements", abonnementsRoutes)
+// rajouter les autres 
 app.get("/", (req,res) => {
     res.json("hello World")
 })
