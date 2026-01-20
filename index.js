@@ -11,6 +11,7 @@ import superadminRoutes from "./routes/superadmin.js"
 import profileRoutes from "./routes/profile.js"
 import abonnementsRoutes from "./routes/abonnements.js"
 import ModifRoutes from "./routes/modifProfil.js"
+import equipementRoutes from "./routes/equipement.js"
 
 const app = express()
 app.use(cookieParser())
@@ -37,6 +38,7 @@ app.use("/api/superadmin", superadminRoutes)
 app.use("/api/voirProfile", profileRoutes)
 app.use("/api/modifProfil", ModifRoutes)
 // rajouter les autres routes
+app.use("/api/equipement", equipementRoutes)
 
 
 
