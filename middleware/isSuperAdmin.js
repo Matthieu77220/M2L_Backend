@@ -6,7 +6,7 @@ const isSuperAdmin = (req, res, next) => {
     const token = req.cookies['token']
 
     try{
-        const user = jwt.verify(token, process.env.SECRET_KEY)
+        const user = jwt.verify(token, process.env.secretKey)
 
         if (user.role === "superAdmin") {
             next()
