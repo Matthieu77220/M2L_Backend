@@ -11,7 +11,6 @@ const isAdmin = (req, res, next) => {
     try {
       
         const user = jwt.verify(token, process.env.secretKey);
-        console.log(user)
         
         req.user = user;
 

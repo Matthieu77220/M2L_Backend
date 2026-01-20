@@ -1,24 +1,27 @@
 import jwt from 'jsonwebtoken'
-require('dotenv').config()
+import 'dotenv/config'
 
 const isSuperAdmin = (req, res, next) => {
-
     const token = req.cookies['token']
 
-    try{
-        const user = jwt.verify(token, process.env.secretKey)
-
-        if (user.role === "superAdmin") {
-            next()
-        }else {
-            return res.status(403).send("Accès interdit : vous n'avez pas les droits !")
-        }
-    }catch (err) {
-        res.clearCookie("token")
-        return res.redirect("/Connexion");
+    if (!token) {
+        return res.status(401).json({ message: "Token manquant" })
     }
 
+    try {
+        const user = jwt.verify(token, process.env.secretKey)
+
+        if (user.role === "superadmin") {
+            req.user = user
+            next()
+        } else {
+            return res.status(403).json({ message: "Accès interdit : vous n'avez pas les droits !" })
+        }
+    } catch (err) {
+        console.error('Erreur JWT:', err)
+        res.clearCookie("token")
+        return res.status(401).json({ message: "Token invalide" })
+    }
 }
 
-module.exports = isSuperAdmin
-
+export default isSuperAdmin

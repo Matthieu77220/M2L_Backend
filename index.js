@@ -40,6 +40,9 @@ app.get("/", (req,res) => {
     res.json("hello World")
 })
 
-app.listen(3000, () => {
-    console.log("✅ BDD connectée !!!");
+const PORT = process.env.PORT || 3000
+
+app.listen(PORT, () => {
+    console.log(`✅ Serveur démarré sur le port ${PORT}`);
+    console.log(`📡 API disponible sur http://localhost:${PORT}`);
 } )
