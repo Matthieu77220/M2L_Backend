@@ -204,7 +204,7 @@ export const updateUser = (req, res) => {
     
     
     const { id } = req.params
-    const { role, prenom, nom, email, telephone, montant_cotisation, type_abonnement } = req.body
+    const { role, prenom, nom, email, telephone, montant_cotisation, type_abonnement, id_club } = req.body
     
     if (!role || !prenom || !nom || !email) {
         return res.status(400).json({ error: "Les champs obligatoires sont manquants" })
@@ -212,11 +212,11 @@ export const updateUser = (req, res) => {
     
     const sql = `
         UPDATE adherent 
-        SET role = ?, prenom = ?, nom = ?, email = ?, telephone = ?, montant_cotisation = ?, type_abonnement = ? 
+        SET role = ?, prenom = ?, nom = ?, email = ?, telephone = ?, montant_cotisation = ?, type_abonnement = ?, id_club = ? 
         WHERE id_adherent = ?
     `
     
-    db.query(sql, [role, prenom, nom, email, telephone, montant_cotisation, type_abonnement, id], (err, results) => {
+    db.query(sql, [role, prenom, nom, email, telephone, montant_cotisation, type_abonnement, id_club, id], (err, results) => {
         if (err) {
             return res.status(500).json({ error: "Erreur lors de la mise à jour de l'utilisateur" })
         }
