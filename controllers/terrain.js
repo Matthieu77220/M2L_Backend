@@ -22,32 +22,48 @@ export const voirTerrain = (req, res) => {
         }
 
         if (result) {
-            return res.send([result[0]])
+            return res.send(result)
         }
     })
 
 }
 
 
-// // ----- Ajouter les terrains ----- //
-// export const ajouterTerrain = (req, res) => {
+// ----- Ajouter les terrains ----- //
+export const ajouterTerrain = (req, res) => {
 
-//     // --- Récupération de l'id de l'adherent depuis le middleware ---
-//     const id = req.user.id
+    const {adresse} = req.body
 
-//     // --- Préparation de la requete préparée pour Afficher les informations de la licence ---
-//     const sql = ` SELECT nom, prenom, date_naissance, email, telephone
-//                   FROM adherent
-//                   WHERE id_adherent = ? ; `
+    const id = req.user.id
 
-//     db.query(sql, id, (err, result) => {
-//         if (err) {
-//             return res.status(500).send("Erreur lors de l'éxecution de la requêtes SQl.")
-//         }
+    // --- Créer et ajouter un Terrain
+    const sql = ` INSERT INTO terrain (adresse, id_club)
+                  VALUES
+                  (?,?); `
 
-//         if (result) {
-//             return res.send([result[0]])
-//         }
-//     })
+            // -- Récupère le terrain selon l'admin du club
+    const sqlRelaodPage = ` SELECT * 
+                  FROM terrain
+                  WHERE id_club = (
+                        SELECT id_club
+                        FROM adherent
+                        WHERE id_adherent = ?
+                  )
+                  ORDER BY id_terrain ASC ; `
 
-// }
+    db.query(sql, [adresse, id], (err, result) => {
+        if (err) {
+            return res.status(500).send("Erreur lors de l'éxecution de la requêtes SQl.")
+        }
+
+        if (result) {
+            db.query(sqlRelaodPage, id, (err, result) => {
+                if (err) {
+                    return res.status(500).send("Erreur lors de l'éxecution de la requêtes Sql")
+                }else {
+                    return res.send(result)  
+                }
+            })
+        }
+    })
+}
