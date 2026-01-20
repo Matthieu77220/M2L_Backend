@@ -4,7 +4,8 @@ import {
     getUserById, 
     createUser, 
     updateUser, 
-    deleteUser 
+    deleteUser,
+    getStats
 } from '../controllers/admin.js';
 import isAdmin from '../middleware/isAdmin.js';
 import cookieJwt from '../middleware/jwt.js';
@@ -41,6 +42,7 @@ router.use(cookieJwt);
 router.use(isAdmin);
 
 // Routes CRUD pour les adhérents
+router.get('/stats', getStats);
 router.get('/users', getAllUsers);
 router.get('/users/:id', getUserById);
 router.post('/users', createUser);

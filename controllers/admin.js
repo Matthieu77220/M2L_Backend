@@ -338,3 +338,27 @@ export const deleteUser = async (req, res) => {
         res.status(500).json({ message: 'Erreur serveur' });
     }
 };
+
+
+
+
+// ----- STATISTICS ----- //
+export const getStats = async (req, res) => {
+    try {
+        const sql = `
+            SELECT 
+                (SELECT COUNT(*) FROM adherent) AS total_users,
+                (SELECT COUNT(*) FROM club) AS total_clubs,
+                (SELECT COUNT(*) FROM licence WHERE fin_licence IS NULL OR fin_licence >= CURDATE()) AS active_licenses,
+                (SELECT COUNT(*) FROM licence) AS total_licenses,
+                (SELECT COUNT(*) FROM reservation) AS total_reservations,
+                (SELECT COUNT(*) FROM matchs) AS total_matches
+        `
+        
+        const [results] = await db.query(sql);
+        res.status(200).json(results[0]);
+    } catch (error) {
+        console.error('Erreur lors de la récupération des statistiques:', error);
+        res.status(500).json({ error: "Erreur lors de la récupération des statistiques" });
+    }
+}
