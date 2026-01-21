@@ -38,6 +38,21 @@ CREATE TABLE TERRAIN (
     FOREIGN KEY (id_club) REFERENCES CLUB(id_club)
 );
 
+-- Table NOTE
+CREATE TABLE NOTE (
+    id_note INT AUTO_INCREMENT,
+    id_terrain INT NOT NULL,
+    id_adherent INT NOT NULL,
+    valeur_note INT,
+
+    PRIMARY KEY (id_note),
+    FOREIGN KEY (id_terrain) REFERENCES TERRAIN(id_terrain),
+    FOREIGN KEY (id_adherent) REFERENCES ADHERENT(id_adherent),
+
+    -- Empêche un adhérent de noter deux fois le même terrain
+    UNIQUE (id_terrain, id_adherent)
+);
+
 CREATE TABLE RESERVATION (
     id_reservation INT PRIMARY KEY AUTO_INCREMENT,
     id_adherent INT,
