@@ -55,7 +55,6 @@ export const createUser = (req, res) => {
     
     console.log('Route POST /api/admin/users appelée');
 
-    // Validation des champs requis
     if (!email || !mot_de_passe || !prenom || !nom || !role || !telephone || !date_naissance) {
         return res.status(400).json({ message: 'Champs requis manquants' });
     }
@@ -78,7 +77,7 @@ export const createUser = (req, res) => {
         return res.status(403).json({ message: 'Un admin ne peut créer que des utilisateurs simples' });
     }
 
-    // Étape 1 : Vérifier si l'email existe déjà
+
     const checkEmailSql = 'SELECT id_adherent FROM ADHERENT WHERE email = ?';
     
     db.query(checkEmailSql, [email], (err, existingUsers) => {
@@ -91,14 +90,14 @@ export const createUser = (req, res) => {
             return res.status(409).json({ message: 'Cet email existe déjà' });
         }
 
-        // Étape 2 : Hasher le mot de passe
+       
         bcrypt.hash(mot_de_passe, 10, (err, hashedPassword) => {
             if (err) {
                 console.error('Erreur lors du hashage du mot de passe:', err);
                 return res.status(500).json({ message: 'Erreur serveur' });
             }
 
-            // Étape 3 : Insérer l'utilisateur
+         
             const insertSql = `INSERT INTO ADHERENT 
                 (role, prenom, nom, email, telephone, date_naissance, mot_de_passe, montant_cotisation, debut_adhesion, fin_adhesion, type_abonnement) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
@@ -152,13 +151,12 @@ export const updateUser = (req, res) => {
     
     console.log('Route PUT /api/admin/users/:id appelée pour id:', id);
 
-    // Seuls les admins et superadmins peuvent modifier des utilisateurs
     if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'superadmin')) {
         return res.status(403).json({ message: 'Accès interdit' });
     }
 
     try {
-        // Étape 1 : Vérifier si l'utilisateur existe
+
         const checkUserSql = 'SELECT id_adherent, role FROM ADHERENT WHERE id_adherent = ?';
         
         db.query(checkUserSql, [id], (err, users) => {
@@ -173,7 +171,7 @@ export const updateUser = (req, res) => {
 
             const targetUser = users[0];
 
-            // Un admin ne peut modifier que des utilisateurs simples
+      
             if (req.user.role === 'admin' && targetUser.role !== 'utilisateur') {
                 return res.status(403).json({ message: 'Un admin ne peut modifier que des utilisateurs simples' });
             }
@@ -231,7 +229,7 @@ export const updateUser = (req, res) => {
                 updateValues.push(type_abonnement);
             }
 
-            // Fonction pour continuer avec la mise à jour
+   
             const proceedWithUpdate = () => {
                 if (updateFields.length === 0) {
                     return res.status(400).json({ message: 'Aucune donnée à mettre à jour' });
@@ -252,7 +250,7 @@ export const updateUser = (req, res) => {
                 });
             };
 
-            // Étape 2 : Vérifier l'email si fourni
+          
             if (email) {
                 const checkEmailSql = 'SELECT id_adherent FROM ADHERENT WHERE email = ? AND id_adherent != ?';
                 
@@ -269,9 +267,9 @@ export const updateUser = (req, res) => {
                     updateFields.push('email = ?');
                     updateValues.push(email);
 
-                    // Étape 3 : Hasher le mot de passe si fourni
+                  
                     if (mot_de_passe) {
-                        if (mot_de_passe.length < 8) {
+                        if (mot_de_passe.length < 12) {
                             return res.status(400).json({ message: 'Le mot de passe doit contenir au moins 8 caractères' });
                         }
 
@@ -291,7 +289,7 @@ export const updateUser = (req, res) => {
                     }
                 });
             } else {
-                // Pas d'email à vérifier, passer au mot de passe
+              
                 if (mot_de_passe) {
                     if (mot_de_passe.length < 8) {
                         return res.status(400).json({ message: 'Le mot de passe doit contenir au moins 8 caractères' });
@@ -324,62 +322,71 @@ export const deleteUser = (req, res) => {
     const { id } = req.params;
     console.log('Route DELETE /api/admin/users/:id appelée pour id:', id);
 
-    // Seuls les admins et superadmins peuvent supprimer
     if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'superadmin')) {
         return res.status(403).json({ message: 'Accès interdit' });
     }
 
-    // Un utilisateur ne peut pas se supprimer lui-même
     if (req.user.id === parseInt(id)) {
         return res.status(403).json({ 
             message: 'Vous ne pouvez pas supprimer votre propre compte' 
         });
     }
 
-    try {
-        // Étape 1 : Vérifier si l'utilisateur existe et récupérer son rôle
-        const checkUserSql = 'SELECT role FROM ADHERENT WHERE id_adherent = ?';
+    const checkUserSql = 'SELECT role FROM ADHERENT WHERE id_adherent = ?';
+    
+    db.query(checkUserSql, [id], (err, users) => {
+        if (err) {
+            console.error('Erreur lors de la vérification de l\'utilisateur:', err);
+            return res.status(500).json({ message: 'Erreur serveur' });
+        }
+
+        if (users.length === 0) {
+            return res.status(404).json({ message: 'Utilisateur non trouvé' });
+        }
+
+        const targetUser = users[0];
+
+        if (req.user.role === 'admin' && targetUser.role !== 'utilisateur') {
+            return res.status(403).json({ message: 'Un admin ne peut supprimer que des utilisateurs simples' });
+        }
+
         
-        db.query(checkUserSql, [id], (err, users) => {
+        const deleteReservationsSql = 'DELETE FROM adherent_reservation WHERE id_adherent = ?';
+        
+        db.query(deleteReservationsSql, [id], (err) => {
             if (err) {
-                console.error('Erreur lors de la vérification de l\'utilisateur:', err);
+                console.error('Erreur lors de la suppression des réservations:', err);
                 return res.status(500).json({ message: 'Erreur serveur' });
             }
 
-            if (users.length === 0) {
-                return res.status(404).json({ message: 'Utilisateur non trouvé' });
-            }
-
-            const targetUser = users[0];
-
-            // Un admin ne peut supprimer que des utilisateurs simples
-            if (req.user.role === 'admin' && targetUser.role !== 'utilisateur') {
-                return res.status(403).json({ message: 'Un admin ne peut supprimer que des utilisateurs simples' });
-            }
-
-            // Étape 2 : Supprimer l'utilisateur
-            const deleteSql = 'DELETE FROM ADHERENT WHERE id_adherent = ?';
+            const deleteLicencesSql = 'DELETE FROM licence WHERE id_adherent = ?';
             
-            db.query(deleteSql, [id], (err, result) => {
+            db.query(deleteLicencesSql, [id], (err) => {
                 if (err) {
-                    console.error('Erreur lors de la suppression:', err);
+                    console.error('Erreur lors de la suppression des licences:', err);
                     return res.status(500).json({ message: 'Erreur serveur' });
                 }
 
-                if (result.affectedRows === 0) {
-                    return res.status(404).json({ message: 'Utilisateur non trouvé' });
-                }
+          
+                const deleteSql = 'DELETE FROM ADHERENT WHERE id_adherent = ?';
+                
+                db.query(deleteSql, [id], (err, result) => {
+                    if (err) {
+                        console.error('Erreur lors de la suppression:', err);
+                        return res.status(500).json({ message: 'Erreur serveur' });
+                    }
 
-                console.log('Utilisateur supprimé avec succès');
-                res.status(200).json({ message: 'Utilisateur supprimé avec succès' });
+                    if (result.affectedRows === 0) {
+                        return res.status(404).json({ message: 'Utilisateur non trouvé' });
+                    }
+
+                    console.log('Utilisateur supprimé avec succès');
+                    res.status(200).json({ message: 'Utilisateur supprimé avec succès' });
+                });
             });
         });
-    } catch (error) {
-        console.error('Erreur lors de la suppression de l\'utilisateur:', error);
-        res.status(500).json({ message: 'Erreur serveur' });
-    }
+    });
 };
-
 
 
 
