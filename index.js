@@ -11,6 +11,9 @@ import profileRoutes from "./routes/profile.js";
 import abonnementsRoutes from "./routes/abonnements.js";
 import ModifRoutes from "./routes/modifProfil.js";
 import terrainRoutes from "./routes/terrainAdmin.js";
+import terrainNotation from "./routes/terrainNotation.js"
+
+
  
 const app = express();
  
@@ -33,6 +36,9 @@ app.use("/api/voirProfile", profileRoutes);
 app.use("/api/modifProfil", ModifRoutes);
 app.use("/api/admin", terrainRoutes);
 app.use("/api/abonnements", abonnementsRoutes);
+
+//
+app.use("/api/admin",terrainNotation )
 
 app.get("/", (req, res) => {
   res.json("hello World");
