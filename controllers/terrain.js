@@ -67,3 +67,26 @@ export const ajouterTerrain = (req, res) => {
         }
     })
 }
+
+
+// ----- Surrpimer un Terrains ----- //
+export const supprimerTerrain = (req, res) => {
+
+    const { id_terrain } = req.body
+    console.log(id_terrain);
+    
+
+    // -- Récupère le terrain selon l'admin du club
+    const sql = ` DELETE FROM terrain WHERE id_terrain = ?;`
+
+    db.query(sql, id_terrain, (err, result) => {
+        if (err) {
+            return res.status(500).send("Erreur lors de l'éxecution de la requêtes SQl.")
+        }
+
+        if (result) {
+            return res.send(result)
+        }
+    })
+
+}

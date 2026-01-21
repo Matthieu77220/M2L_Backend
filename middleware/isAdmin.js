@@ -2,7 +2,8 @@ import jwt from 'jsonwebtoken';
 import 'dotenv/config';
 
 const isAdmin = (req, res, next) => {
-    const token = req.cookies['token'];
+    const token = req.cookies.token
+    
 
     if (!token) {
         return res.status(401).json({ message: "Token manquant" });
@@ -17,6 +18,8 @@ const isAdmin = (req, res, next) => {
  
         if (user.role === 'admin') {
             next();
+            // console.log(user);
+            
         } else {
             return res.status(403).json({ 
                 message: "Accès interdit : vous n'avez pas les droits !" 
