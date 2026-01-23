@@ -8,7 +8,8 @@ CREATE TABLE CLUB (
 
 CREATE TABLE ADHERENT (
     id_adherent INT PRIMARY KEY AUTO_INCREMENT,
-    role VARCHAR(10) NOT NULL,
+    id_club INT NULL
+    role VARCHAR(11) NOT NULL,
     prenom VARCHAR(50) NOT NULL,
     nom VARCHAR(50) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
@@ -29,7 +30,7 @@ CREATE TABLE LICENCE (
     fin_licence DATE,
     id_adherent INT,
     FOREIGN KEY (id_adherent) REFERENCES ADHERENT(id_adherent)
-)
+);
 
 CREATE TABLE TERRAIN (
     id_terrain INT PRIMARY KEY AUTO_INCREMENT,
@@ -72,7 +73,8 @@ CREATE TABLE ADHERENT_RESERVATION (
 
 CREATE TABLE CHASUBLE(
     id_chasuble INT PRIMARY KEY AUTO_INCREMENT,
-    nb_chasuble INT DEFAULT 100,
+    stock_base INT DEFAULT 100,
+    stock_current INT,
     id_terrain INT,
     id_club INT,
     FOREIGN KEY (id_terrain) REFERENCES TERRAIN(id_terrain),
@@ -81,7 +83,8 @@ CREATE TABLE CHASUBLE(
 
 CREATE TABLE BALLON(
     id_ballon INT PRIMARY KEY AUTO_INCREMENT,
-    nb_ballon INT DEFAULT 20,
+    stock_base INT DEFAULT 20,
+    stock_current INT,
     id_terrain INT,
     id_club INT,
     FOREIGN KEY (id_terrain) REFERENCES TERRAIN(id_terrain),
@@ -90,7 +93,8 @@ CREATE TABLE BALLON(
 
 CREATE TABLE CRAMPON(
     id_crampon INT PRIMARY KEY AUTO_INCREMENT,
-    nb_crampon INT DEFAULT 100,
+    stock_base INT DEFAULT 100,
+    stock_current INT,
     id_terrain INT,
     id_club INT,
     FOREIGN KEY (id_terrain) REFERENCES TERRAIN(id_terrain),

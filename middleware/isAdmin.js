@@ -18,8 +18,6 @@ const isAdmin = (req, res, next) => {
  
         if (user.role === 'admin') {
             next();
-            // console.log(user);
-            
         } else {
             return res.status(403).json({ 
                 message: "Accès interdit : vous n'avez pas les droits !" 
