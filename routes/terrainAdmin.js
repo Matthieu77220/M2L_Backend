@@ -1,6 +1,6 @@
 import express from "express"
 import isAdmin from "../middleware/isAdmin.js"
-import { voirTerrain, ajouterTerrain, supprimerTerrain } from "../controllers/terrain.js"
+import { voirTerrain, ajouterTerrain, supprimerTerrain, modifierTerrain } from "../controllers/terrain.js"
 
 const router = express.Router()
 
@@ -8,6 +8,7 @@ const router = express.Router()
 router.get("/voirTerrain", isAdmin , voirTerrain)
 router.post("/ajouterTerrain", isAdmin, ajouterTerrain)
 router.delete("/supprimerTerrain", isAdmin, supprimerTerrain)
+router.put("/modifierTerrain", isAdmin, modifierTerrain)
 
 
 export default router
