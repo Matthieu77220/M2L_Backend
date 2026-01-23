@@ -75,11 +75,15 @@ export const supprimerTerrain = (req, res) => {
     const { id_terrain } = req.body
     
 
-    // -- Suppression du terrain
-    const sql = ` DELETE FROM terrain WHERE id_terrain = ?;`
+    // -- Suppression des Foreign Key et le terrain
+    const sqlDeleteFK = `
+                        DELETE FROM chasuble WHERE id_terrain = ?;
+                        DELETE FROM crampon  WHERE id_terrain = ?;
+                        DELETE FROM ballon   WHERE id_terrain = ?;
+                        DELETE FROM reservation WHERE id_terrain = ?;
+                        DELETE FROM terrain WHERE id_terrain = ?;`
 
-
-    db.query(sql, [id_terrain], (err, result) => {
+    db.query(sqlDeleteFK, [id_terrain, id_terrain, id_terrain, id_terrain, id_terrain], (err, result) => {
         if (err) {
             return res.status(500).send("Erreur lors de l'éxecution de la requêtes SQl.")
         }
@@ -97,9 +101,6 @@ export const supprimerTerrain = (req, res) => {
 export const modifierTerrain = (req, res) => {
 
     const { id_terrain, adresse } = req.body
-    console.log(req.body);
-    
-    
 
     // -- Suppression du terrain
     const sql = ` UPDATE terrain SET adresse = ? where id_terrain = ? `
