@@ -337,7 +337,7 @@ export const deleteUser = (req, res) => {
       return res.status(403).json({ message: "Un admin ne peut supprimer que des utilisateurs simples" });
     }
 
-    // 1) Supprimer les matchs des réservations que cet adhérent possède
+    // Supprimer les matchs des réservations que cet adhérent possède
     const deleteMatchsSql = `
       DELETE FROM matchs
       WHERE id_reservation IN (
@@ -347,7 +347,7 @@ export const deleteUser = (req, res) => {
     db.query(deleteMatchsSql, [id], (err) => {
       if (err) return res.status(500).json({ message: "Erreur serveur (matchs)" });
 
-      // 2) Supprimer toutes les liaisons adherent_reservation où il est PARTICIPANT (c'est ça qui te bloque)
+      // Supprimer toutes les liaisons adherent_reservation où il est PARTICIPANT (c'est ça qui te bloque)
       const deleteARByAdherentSql = `
         DELETE FROM adherent_reservation
         WHERE id_adherent = ?
@@ -355,7 +355,7 @@ export const deleteUser = (req, res) => {
       db.query(deleteARByAdherentSql, [id], (err) => {
         if (err) return res.status(500).json({ message: "Erreur serveur (adherent_reservation par adherent)" });
 
-        // 3) Supprimer les liaisons adherent_reservation des réservations qu’il possède (au cas où)
+        // Supprimer les liaisons adherent_reservation des réservations qu’il possède (au cas où)
         const deleteARByReservationSql = `
           DELETE FROM adherent_reservation
           WHERE id_reservation IN (
@@ -365,22 +365,22 @@ export const deleteUser = (req, res) => {
         db.query(deleteARByReservationSql, [id], (err) => {
           if (err) return res.status(500).json({ message: "Erreur serveur (adherent_reservation par reservation)" });
 
-          // 4) Supprimer ses réservations
+          // Supprimer ses réservations
           const deleteReservationSql = "DELETE FROM reservation WHERE id_adherent = ?";
           db.query(deleteReservationSql, [id], (err) => {
             if (err) return res.status(500).json({ message: "Erreur serveur (reservation)" });
 
-            // 5) licences
+            // licences
             const deleteLicencesSql = "DELETE FROM licence WHERE id_adherent = ?";
             db.query(deleteLicencesSql, [id], (err) => {
               if (err) return res.status(500).json({ message: "Erreur serveur (licence)" });
 
-              // 6) commentaires
+              // commentaires
               const deleteCommentairesSql = "DELETE FROM commentaire WHERE id_adherent = ?";
               db.query(deleteCommentairesSql, [id], (err) => {
                 if (err) return res.status(500).json({ message: "Erreur serveur (commentaire)" });
 
-                // 7) supprimer l’adhérent
+                //supprimer l’adhérent
                 const deleteSql = "DELETE FROM ADHERENT WHERE id_adherent = ?";
                 db.query(deleteSql, [id], (err, result) => {
                   if (err) return res.status(500).json({ message: "Erreur serveur (adherent)" });
