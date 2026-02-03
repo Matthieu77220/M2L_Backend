@@ -2,9 +2,7 @@ import db from "../config/db.js"
 import 'dotenv/config'
 
 export const modificationProfile = (req, res) => {
-    const { prenom, nom, email, dateDeNaissance, telephone } = req.body
-    console.log(dateDeNaissance);
-    
+    const { prenom, nom, email, dateDeNaissance, telephone } = req.body    
     
     const id = req.user.id
   
