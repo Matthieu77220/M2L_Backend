@@ -12,7 +12,7 @@ const isSuperAdmin = (req, res, next) => {
     try {
         const user = jwt.verify(token, process.env.secretKey)
 
-        if (user.role === "superadmin") {
+        if (user.role === "superAdmin") {
             req.user = user
             next()
         } else {
