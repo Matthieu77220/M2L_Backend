@@ -10,7 +10,8 @@ const db = mysql2.createPool({
   database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  multipleStatements: true // permet d'executer plusieurs requetes SQL
 })
 
 export default db;

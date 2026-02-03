@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
- 
+
 // Routes
 import authRoutes from "./routes/auth.js";
 import licenceRoutes from "./routes/licence.js";
@@ -12,18 +12,23 @@ import ModifRoutes from "./routes/modifProfil.js";
 import terrainRoutes from "./routes/terrainAdmin.js";
 import adminRoutes from "./routes/admin_routes.js"
  
+import equipementRoutes from "./routes/equipement.js";
+
 const app = express();
- 
+
+app.use(cookieParser());
+
 // ----- CORS -----
-app.use(cors({
+const corsOptions = {
   origin: "http://localhost:5173",
   credentials: true,
-}));
- 
+};
+
+app.use(cors(corsOptions));
+
 // ----- Middlewares -----
-app.use(cookieParser());
 app.use(express.json());
- 
+
 // ----- Routes -----
 app.use("/api/auth", authRoutes);
 app.use("/api/licence", licenceRoutes);
@@ -33,11 +38,12 @@ app.use("/api/voirProfile", profileRoutes);
 app.use("/api/modifProfil", ModifRoutes);
 app.use("/api/admin", terrainRoutes);
 app.use("/api/admin", adminRoutes) 
+app.use("/api/equipement", equipementRoutes);
 
 app.get("/", (req, res) => {
   res.json("hello World");
 });
- 
+
 app.listen(3000, () => {
   console.log("✅ Serveur lancé : http://localhost:3000");
 });

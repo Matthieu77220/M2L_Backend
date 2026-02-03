@@ -32,16 +32,21 @@ export const voirTerrain = (req, res) => {
 // ----- Ajouter les terrains ----- //
 export const ajouterTerrain = (req, res) => {
 
-    const {adresse} = req.body
+    const { adresse } = req.body
 
     const id = req.user.id
+
+    // --- Récupère le id_club de l'admin
+    const id_club = ` SELECT id_club FROM adherent 
+                      where id_adherent = ? `
+
 
     // --- Créer et ajouter un Terrain
     const sql = ` INSERT INTO terrain (adresse, id_club)
                   VALUES
                   (?,?); `
 
-            // -- Récupère le terrain selon l'admin du club
+    // -- Récupère le terrain selon l'admin du club
     const sqlRelaodPage = ` SELECT * 
                   FROM terrain
                   WHERE id_club = (
@@ -51,21 +56,31 @@ export const ajouterTerrain = (req, res) => {
                   )
                   ORDER BY id_terrain ASC ; `
 
-    db.query(sql, [adresse, id], (err, result) => {
-        if (err) {
-            return res.status(500).send("Erreur lors de l'éxecution de la requêtes SQl.")
-        }
-
-        if (result) {
-            db.query(sqlRelaodPage, id, (err, result) => {
+    db.query(id_club, id, (err, result) => {
+        if (result.length == 1) {
+            console.log(result[0].id_club);
+            
+            db.query(sql, [adresse, result[0].id_club], (err, result) => {
                 if (err) {
-                    return res.status(500).send("Erreur lors de l'éxecution de la requêtes Sql")
-                }else {
-                    return res.send(result)  
+                    return res.status(500).send("Erreur lors de l'éxecution de la requêtes SQl.")
+                }
+
+                if (result) {
+                    db.query(sqlRelaodPage, id, (err, result) => {
+                        if (err) {
+                            return res.status(500).send("Erreur lors de l'éxecution de la requêtes Sql")
+                        } else {
+                            return res.send(result)
+                        }
+                    })
                 }
             })
+        }else {
+            return res.status(500).send("Le compte n'appartient pas à un club.")
         }
     })
+
+
 }
 
 
@@ -73,19 +88,46 @@ export const ajouterTerrain = (req, res) => {
 export const supprimerTerrain = (req, res) => {
 
     const { id_terrain } = req.body
-    console.log(id_terrain);
-    
 
-    // -- Récupère le terrain selon l'admin du club
-    const sql = ` DELETE FROM terrain WHERE id_terrain = ?;`
 
-    db.query(sql, id_terrain, (err, result) => {
+    // -- Suppression des Foreign Key et le terrain
+    const sqlDeleteFK = `
+                        DELETE FROM chasuble WHERE id_terrain = ?;
+                        DELETE FROM crampon  WHERE id_terrain = ?;
+                        DELETE FROM ballon   WHERE id_terrain = ?;
+                        DELETE FROM reservation WHERE id_terrain = ?;
+                        DELETE FROM terrain WHERE id_terrain = ?;`
+
+    db.query(sqlDeleteFK, [id_terrain, id_terrain, id_terrain, id_terrain, id_terrain], (err, result) => {
         if (err) {
             return res.status(500).send("Erreur lors de l'éxecution de la requêtes SQl.")
         }
 
         if (result) {
-            return res.send(result)
+            return res.status(200).send("Terrain supprimer avec succès !")
+        }
+    })
+
+}
+
+
+
+// ----- Modifier un Terrains ----- //
+export const modifierTerrain = (req, res) => {
+
+    const { id_terrain, adresse } = req.body
+
+    // -- Modifier
+    const sql = ` UPDATE terrain SET adresse = ? where id_terrain = ? `
+
+
+    db.query(sql, [adresse, id_terrain], (err, result) => {
+        if (err) {
+            return res.status(500).send("Erreur lors de l'éxecution de la requêtes SQl.")
+        }
+
+        if (result) {
+            return res.status(200).send("Terrain supprimer avec succès !")
         }
     })
 
