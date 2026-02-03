@@ -8,9 +8,9 @@ import licenceRoutes from "./routes/licence.js";
 import statistiqueAdherentRoutes from "./routes/statistiqueAdherent.js";
 import superadminRoutes from "./routes/superadmin.js";
 import profileRoutes from "./routes/profile.js";
-import abonnementsRoutes from "./routes/abonnements.js";
 import ModifRoutes from "./routes/modifProfil.js";
 import terrainRoutes from "./routes/terrainAdmin.js";
+import adminRoutes from "./routes/admin_routes.js"
  
 const app = express();
  
@@ -32,7 +32,7 @@ app.use("/api/superadmin", superadminRoutes);
 app.use("/api/voirProfile", profileRoutes);
 app.use("/api/modifProfil", ModifRoutes);
 app.use("/api/admin", terrainRoutes);
-app.use("/api/abonnements", abonnementsRoutes);
+app.use("/api/admin", adminRoutes) 
 
 app.get("/", (req, res) => {
   res.json("hello World");
