@@ -1,38 +1,27 @@
 import db from "../config/db.js"
 import 'dotenv/config'
-import jwt from "jsonwebtoken"
 
 export const modificationProfile = (req, res) => {
-    const { prenom, nom, email, telephone } = req.body
+    const { prenom, nom, email, dateDeNaissance, telephone } = req.body
+    console.log(dateDeNaissance);
     
-    // Récupération de l'ID depuis le token
-    const token = req.cookies.token
     
+    const id = req.user.id
   
-    if (!token) {
-        return res.status(401).send("Non authentifié !")
-    }
-    
-  
-    if (!prenom || !nom || !email || !telephone) {
+    if (!prenom || !nom || !email || !dateDeNaissance || !telephone) {
         return res.status(400).send("Champs manquants !")
     }
     
-    // Décodage du token pour récupérer l'ID
-    try {
-        const decoded = jwt.verify(token, process.env.secretKey)
-        const userId = decoded.id
+    try {      
+        const sql = "UPDATE adherent SET prenom = ?, nom = ?, email = ?, date_naissance = ?, telephone = ? WHERE id_adherent = ?"
         
-      
-        const sql = "UPDATE adherent SET prenom = ?, nom = ?, email = ?, telephone = ? WHERE id_adherent = ?"
-        
-        db.query(sql, [prenom, nom, email, telephone, userId], (err, results) => {
+        db.query(sql, [prenom, nom, email, dateDeNaissance, telephone, id], (err, results) => {
             if (err) {
                 return res.status(500).send("Erreur lors de la modification du profil !")
             }
             
           
-            if (results.affectedRows === 0) {
+            if (results.length === 0) {
                 return res.status(404).send("Utilisateur non trouvé !")
             }
             
