@@ -1,53 +1,49 @@
-// Import dépendances
-import express from "express"
-import cors from "cors"
-import cookieParser from "cookie-parser"
+import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
 
-// Import des Routes
-import authRoutes from "./routes/auth.js"
-import licenceRoutes from "./routes/licence.js"
-import statistiqueAdherentRoutes from "./routes/statistiqueAdherent.js"
-import superadminRoutes from "./routes/superadmin.js"
-import profileRoutes from "./routes/profile.js"
-import abonnementsRoutes from "./routes/abonnements.js"
-import ModifRoutes from "./routes/modifProfil.js"
+// Routes
+import authRoutes from "./routes/auth.js";
+import licenceRoutes from "./routes/licence.js";
+import statistiqueAdherentRoutes from "./routes/statistiqueAdherent.js";
+import superadminRoutes from "./routes/superadmin.js";
+import profileRoutes from "./routes/profile.js";
+import ModifRoutes from "./routes/modifProfil.js";
+import terrainRoutes from "./routes/terrainAdmin.js";
+import adminRoutes from "./routes/admin_routes.js"
+ 
+import equipementRoutes from "./routes/equipement.js";
 
-const app = express()
-app.use(cookieParser())
-
-// ----- CORS ----- //// 
-// Options des Control Origin Request Sharing ou CORS
-const corsOptions = {
-  origin: 'http://localhost:5173',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}
-app.use(cors(corsOptions));
+const app = express();
 
 app.use(cookieParser());
 
-app.use(express.json())
+// ----- CORS -----
+const corsOptions = {
+  origin: "http://localhost:5173",
+  credentials: true,
+};
 
-// ------ Appel des routes ------ //
-app.use("/api/auth", authRoutes)
-app.use("/api/licence", licenceRoutes)
-app.use("/api/statistiqueAdherent", statistiqueAdherentRoutes)
-app.use("/api/superadmin", superadminRoutes)
-app.use("/api/voirProfile", profileRoutes)
-app.use("/api/modifProfil", ModifRoutes)
-// rajouter les autres routes
+app.use(cors(corsOptions));
 
+// ----- Middlewares -----
+app.use(express.json());
 
+// ----- Routes -----
+app.use("/api/auth", authRoutes);
+app.use("/api/licence", licenceRoutes);
+app.use("/api/statistiqueAdherent", statistiqueAdherentRoutes);
+app.use("/api/superadmin", superadminRoutes);
+app.use("/api/voirProfile", profileRoutes);
+app.use("/api/modifProfil", ModifRoutes);
+app.use("/api/admin", terrainRoutes);
+app.use("/api/admin", adminRoutes) 
+app.use("/api/equipement", equipementRoutes);
 
-
-
-app.use("/api/abonnements", abonnementsRoutes)
-// rajouter les autres 
-app.get("/", (req,res) => {
-    res.json("hello World")
-})
+app.get("/", (req, res) => {
+  res.json("hello World");
+});
 
 app.listen(3000, () => {
-    console.log("✅ BDD connectée !!! http://localhost:3000");
-} )
+  console.log("✅ Serveur lancé : http://localhost:3000");
+});
