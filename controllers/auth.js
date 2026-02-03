@@ -182,7 +182,7 @@ export const modifierMotDePasse = (req, res) => {
         return res.status(400).send("Champs manquants !")
     }
 
-    if (newConfirmMotDePasse < 12 ) {
+    if (newConfirmMotDePasse.length < 12 ) {
         return res.status(400).send("Mot de passe trop court !")
     }
 
