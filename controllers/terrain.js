@@ -97,12 +97,12 @@ export const supprimerTerrain = (req, res) => {
 
 
 
-// ----- Surrpimer un Terrains ----- //
+// ----- Modifier un Terrains ----- //
 export const modifierTerrain = (req, res) => {
 
     const { id_terrain, adresse } = req.body
 
-    // -- Suppression du terrain
+    // -- Modifier
     const sql = ` UPDATE terrain SET adresse = ? where id_terrain = ? `
 
 
