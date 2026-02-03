@@ -1,5 +1,5 @@
-import db from "../config/db.js"
 import 'dotenv/config'
+import db from "../config/db.js"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 
@@ -63,7 +63,12 @@ export const inscription = (req, res) => {
                         maxAge: 24 * 60 * 60 * 1000,// 24h
                     })         
 
-                    res.send("Adherent ajouté avec succès !")
+                    // Renvoie l'ID et le rôle pour que le frontend puisse les stocker
+                    return res.json({
+                        message: "Adherent ajouté avec succès !",
+                        id: user,
+                        role: "utilisateur"
+                    })
                 })
             }
         })
@@ -125,7 +130,11 @@ export const connexion = (req, res) => {
 
             });
             
-            return res.send("Vous êtes connecté !");
+            return res.json({ 
+                message: "Vous êtes connecté !",
+                role: user.role,
+                id: user.id_adherent
+            });
         });
     })
 }

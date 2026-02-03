@@ -12,6 +12,23 @@ START TRANSACTION;
 SET time_zone = "+00:00";
 
 
+CREATE TABLE ADHERENT (
+    id_adherent INT PRIMARY KEY AUTO_INCREMENT,
+    role VARCHAR(10) NOT NULL,
+    prenom VARCHAR(50) NOT NULL,
+    nom VARCHAR(50) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    telephone VARCHAR(20) NOT NULL,
+    date_naissance DATE NOT NULL,
+    montant_cotisation DECIMAL(10,2),
+    mot_de_passe VARCHAR(255) NOT NULL,
+    debut_adhesion DATE,
+    abonnement varchar(10),
+    fin_adhesion DATE,
+    type_abonnement VARCHAR(255)
+);
+
+
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
