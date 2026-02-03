@@ -12,8 +12,8 @@ const router = express.Router();
 // GET /api/abonnements - Liste tous les abonnements disponibles
 router.get("/", getAllAbonnements);
 
-// POST /api/abonnements/acheter - Acheter un abonnement
-router.post("/acheter", acheterAbonnement);
+// POST /api/abonnements/acheter - Acheter un abonnement (authentification requise)
+router.post("/acheter", cookieJwt, acheterAbonnement);
 
 // POST /api/abonnements/choisir - Choisir un abonnement (ancienne route)
 router.post("/choisir", choisirAbonnement);
