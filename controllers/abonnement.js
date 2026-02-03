@@ -32,16 +32,13 @@ export const getAllAbonnements = (req, res) => {
 };
 
 // POST /api/abonnements/acheter
-// body attendu : { id_adherent: number, id_abonnement: number }
+// body attendu : { id_abonnement: number }
+// id_adherent est récupéré depuis le JWT (req.user.id)
 // → met à jour le champ "type_abonnement" dans la table ADHERENT
 export const acheterAbonnement = (req, res) => {
-  const { id_adherent, id_abonnement } = req.body;
+  const { id_abonnement } = req.body;
+  const id_adherent = req.user.id; // Récupéré depuis le middleware JWT
 
-  if (!id_adherent || !id_abonnement) {
-    return res
-      .status(400)
-      .json({ message: "id_adherent et id_abonnement sont requis" });
-  }
 
   // Trouver l'abonnement correspondant
   const abonnement = ABONNEMENTS.find(a => a.id === id_abonnement);
