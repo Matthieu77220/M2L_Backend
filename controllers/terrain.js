@@ -57,10 +57,9 @@ export const ajouterTerrain = (req, res) => {
                   ORDER BY id_terrain ASC ; `
 
     db.query(id_club, id, (err, result) => {
+        // -- Vérifie que l'admin est associé a id_club
         if (result.length == 1) {
-            console.log(result[0].id_club);
-            
-            db.query(sql, [adresse, result[0].id_club], (err, result) => {
+            db.query(sql, [adresse, result[0].id_club], (err, result) => { // result[0].id_club = id_club
                 if (err) {
                     return res.status(500).send("Erreur lors de l'éxecution de la requêtes SQl.")
                 }
