@@ -317,76 +317,86 @@ export const updateUser = (req, res) => {
     }
 };
 
-// DELETE - Supprimer un utilisateur
 export const deleteUser = (req, res) => {
-    const { id } = req.params;
-    console.log('Route DELETE /api/admin/users/:id appelée pour id:', id);
+  const { id } = req.params;
 
-    if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'superadmin')) {
-        return res.status(403).json({ message: 'Accès interdit' });
+  if (!req.user || (req.user.role !== "admin" && req.user.role !== "superadmin")) {
+    return res.status(403).json({ message: "Accès interdit" });
+  }
+  if (req.user.id === parseInt(id)) {
+    return res.status(403).json({ message: "Vous ne pouvez pas supprimer votre propre compte" });
+  }
+
+  const checkUserSql = "SELECT role FROM ADHERENT WHERE id_adherent = ?";
+  db.query(checkUserSql, [id], (err, users) => {
+    if (err) return res.status(500).json({ message: "Erreur serveur" });
+    if (users.length === 0) return res.status(404).json({ message: "Utilisateur non trouvé" });
+
+    const targetUser = users[0];
+    if (req.user.role === "admin" && targetUser.role !== "utilisateur") {
+      return res.status(403).json({ message: "Un admin ne peut supprimer que des utilisateurs simples" });
     }
 
-    if (req.user.id === parseInt(id)) {
-        return res.status(403).json({ 
-            message: 'Vous ne pouvez pas supprimer votre propre compte' 
-        });
-    }
+    // 1) Supprimer les matchs des réservations que cet adhérent possède
+    const deleteMatchsSql = `
+      DELETE FROM matchs
+      WHERE id_reservation IN (
+        SELECT id_reservation FROM reservation WHERE id_adherent = ?
+      )
+    `;
+    db.query(deleteMatchsSql, [id], (err) => {
+      if (err) return res.status(500).json({ message: "Erreur serveur (matchs)" });
 
-    const checkUserSql = 'SELECT role FROM ADHERENT WHERE id_adherent = ?';
-    
-    db.query(checkUserSql, [id], (err, users) => {
-        if (err) {
-            console.error('Erreur lors de la vérification de l\'utilisateur:', err);
-            return res.status(500).json({ message: 'Erreur serveur' });
-        }
+      // 2) Supprimer toutes les liaisons adherent_reservation où il est PARTICIPANT (c'est ça qui te bloque)
+      const deleteARByAdherentSql = `
+        DELETE FROM adherent_reservation
+        WHERE id_adherent = ?
+      `;
+      db.query(deleteARByAdherentSql, [id], (err) => {
+        if (err) return res.status(500).json({ message: "Erreur serveur (adherent_reservation par adherent)" });
 
-        if (users.length === 0) {
-            return res.status(404).json({ message: 'Utilisateur non trouvé' });
-        }
+        // 3) Supprimer les liaisons adherent_reservation des réservations qu’il possède (au cas où)
+        const deleteARByReservationSql = `
+          DELETE FROM adherent_reservation
+          WHERE id_reservation IN (
+            SELECT id_reservation FROM reservation WHERE id_adherent = ?
+          )
+        `;
+        db.query(deleteARByReservationSql, [id], (err) => {
+          if (err) return res.status(500).json({ message: "Erreur serveur (adherent_reservation par reservation)" });
 
-        const targetUser = users[0];
+          // 4) Supprimer ses réservations
+          const deleteReservationSql = "DELETE FROM reservation WHERE id_adherent = ?";
+          db.query(deleteReservationSql, [id], (err) => {
+            if (err) return res.status(500).json({ message: "Erreur serveur (reservation)" });
 
-        if (req.user.role === 'admin' && targetUser.role !== 'utilisateur') {
-            return res.status(403).json({ message: 'Un admin ne peut supprimer que des utilisateurs simples' });
-        }
-
-        
-        const deleteReservationsSql = 'DELETE FROM adherent_reservation WHERE id_adherent = ?';
-        
-        db.query(deleteReservationsSql, [id], (err) => {
-            if (err) {
-                console.error('Erreur lors de la suppression des réservations:', err);
-                return res.status(500).json({ message: 'Erreur serveur' });
-            }
-
-            const deleteLicencesSql = 'DELETE FROM licence WHERE id_adherent = ?';
-            
+            // 5) licences
+            const deleteLicencesSql = "DELETE FROM licence WHERE id_adherent = ?";
             db.query(deleteLicencesSql, [id], (err) => {
-                if (err) {
-                    console.error('Erreur lors de la suppression des licences:', err);
-                    return res.status(500).json({ message: 'Erreur serveur' });
-                }
+              if (err) return res.status(500).json({ message: "Erreur serveur (licence)" });
 
-          
-                const deleteSql = 'DELETE FROM ADHERENT WHERE id_adherent = ?';
-                
+              // 6) commentaires
+              const deleteCommentairesSql = "DELETE FROM commentaire WHERE id_adherent = ?";
+              db.query(deleteCommentairesSql, [id], (err) => {
+                if (err) return res.status(500).json({ message: "Erreur serveur (commentaire)" });
+
+                // 7) supprimer l’adhérent
+                const deleteSql = "DELETE FROM ADHERENT WHERE id_adherent = ?";
                 db.query(deleteSql, [id], (err, result) => {
-                    if (err) {
-                        console.error('Erreur lors de la suppression:', err);
-                        return res.status(500).json({ message: 'Erreur serveur' });
-                    }
+                  if (err) return res.status(500).json({ message: "Erreur serveur (adherent)" });
+                  if (result.affectedRows === 0) return res.status(404).json({ message: "Utilisateur non trouvé" });
 
-                    if (result.affectedRows === 0) {
-                        return res.status(404).json({ message: 'Utilisateur non trouvé' });
-                    }
-
-                    console.log('Utilisateur supprimé avec succès');
-                    res.status(200).json({ message: 'Utilisateur supprimé avec succès' });
+                  return res.status(200).json({ message: "Utilisateur supprimé avec succès" });
                 });
+              });
             });
+          });
         });
+      });
     });
+  });
 };
+
 
 
 
