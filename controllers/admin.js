@@ -17,18 +17,18 @@ export const getAllUsers = (req, res) => {
                 type_abonnement 
              FROM ADHERENT 
              ORDER BY id_adherent ASC`
-             
+
         db.query(sql, (err, result) => {
-            if(err){
+            if (err) {
                 console.error('Erreur SQL:', err);
                 return res.status(500).json({ message: "Erreur serveur !" });
             }
-            
-            if(result.length === 0){
-                return res.status(200).json([]); 
+
+            if (result.length === 0) {
+                return res.status(200).json([]);
             }
-            
-   
+
+
             res.status(200).json(result);
         });
     } catch (error) {
@@ -39,20 +39,20 @@ export const getAllUsers = (req, res) => {
 
 // POST - Créer un nouvel utilisateur
 export const createUser = (req, res) => {
-    const { 
-        role, 
-        prenom, 
-        nom, 
-        email, 
-        telephone, 
-        date_naissance, 
+    const {
+        role,
+        prenom,
+        nom,
+        email,
+        telephone,
+        date_naissance,
         mot_de_passe,
         montant_cotisation,
         debut_adhesion,
         fin_adhesion,
         type_abonnement
     } = req.body;
-    
+
     console.log('Route POST /api/admin/users appelée');
 
     if (!email || !mot_de_passe || !prenom || !nom || !role || !telephone || !date_naissance) {
@@ -79,7 +79,7 @@ export const createUser = (req, res) => {
 
 
     const checkEmailSql = 'SELECT id_adherent FROM ADHERENT WHERE email = ?';
-    
+
     db.query(checkEmailSql, [email], (err, existingUsers) => {
         if (err) {
             console.error('Erreur lors de la vérification de l\'email:', err);
@@ -90,25 +90,25 @@ export const createUser = (req, res) => {
             return res.status(409).json({ message: 'Cet email existe déjà' });
         }
 
-       
+
         bcrypt.hash(mot_de_passe, 10, (err, hashedPassword) => {
             if (err) {
                 console.error('Erreur lors du hashage du mot de passe:', err);
                 return res.status(500).json({ message: 'Erreur serveur' });
             }
 
-         
+
             const insertSql = `INSERT INTO ADHERENT 
                 (role, prenom, nom, email, telephone, date_naissance, mot_de_passe, montant_cotisation, debut_adhesion, fin_adhesion, type_abonnement) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
             const values = [
-                role, 
-                prenom, 
-                nom, 
-                email, 
-                telephone, 
-                date_naissance, 
+                role,
+                prenom,
+                nom,
+                email,
+                telephone,
+                date_naissance,
                 hashedPassword,
                 montant_cotisation || null,
                 debut_adhesion || null,
@@ -135,20 +135,20 @@ export const createUser = (req, res) => {
 // PUT - Modifier un utilisateur
 export const updateUser = (req, res) => {
     const { id } = req.params;
-    const { 
-        role, 
-        prenom, 
-        nom, 
-        email, 
-        telephone, 
-        date_naissance, 
+    const {
+        role,
+        prenom,
+        nom,
+        email,
+        telephone,
+        date_naissance,
         mot_de_passe,
         montant_cotisation,
         debut_adhesion,
         fin_adhesion,
         type_abonnement
     } = req.body;
-    
+
     console.log('Route PUT /api/admin/users/:id appelée pour id:', id);
 
     if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'superadmin')) {
@@ -158,7 +158,7 @@ export const updateUser = (req, res) => {
     try {
 
         const checkUserSql = 'SELECT id_adherent, role FROM ADHERENT WHERE id_adherent = ?';
-        
+
         db.query(checkUserSql, [id], (err, users) => {
             if (err) {
                 console.error('Erreur lors de la vérification de l\'utilisateur:', err);
@@ -171,7 +171,7 @@ export const updateUser = (req, res) => {
 
             const targetUser = users[0];
 
-      
+
             if (req.user.role === 'admin' && targetUser.role !== 'utilisateur') {
                 return res.status(403).json({ message: 'Un admin ne peut modifier que des utilisateurs simples' });
             }
@@ -229,7 +229,7 @@ export const updateUser = (req, res) => {
                 updateValues.push(type_abonnement);
             }
 
-   
+
             const proceedWithUpdate = () => {
                 if (updateFields.length === 0) {
                     return res.status(400).json({ message: 'Aucune donnée à mettre à jour' });
@@ -250,10 +250,10 @@ export const updateUser = (req, res) => {
                 });
             };
 
-          
+
             if (email) {
                 const checkEmailSql = 'SELECT id_adherent FROM ADHERENT WHERE email = ? AND id_adherent != ?';
-                
+
                 db.query(checkEmailSql, [email, id], (err, existingUsers) => {
                     if (err) {
                         console.error('Erreur lors de la vérification de l\'email:', err);
@@ -267,7 +267,7 @@ export const updateUser = (req, res) => {
                     updateFields.push('email = ?');
                     updateValues.push(email);
 
-                  
+
                     if (mot_de_passe) {
                         if (mot_de_passe.length < 12) {
                             return res.status(400).json({ message: 'Le mot de passe doit contenir au moins 8 caractères' });
@@ -289,7 +289,7 @@ export const updateUser = (req, res) => {
                     }
                 });
             } else {
-              
+
                 if (mot_de_passe) {
                     if (mot_de_passe.length < 8) {
                         return res.status(400).json({ message: 'Le mot de passe doit contenir au moins 8 caractères' });
@@ -318,92 +318,91 @@ export const updateUser = (req, res) => {
 };
 
 export const deleteUser = (req, res) => {
-  const { id } = req.params;
+    const { id } = req.params;
 
-  if (!req.user || (req.user.role !== "admin" && req.user.role !== "superadmin")) {
-    return res.status(403).json({ message: "Accès interdit" });
-  }
-  if (req.user.id === parseInt(id)) {
-    return res.status(403).json({ message: "Vous ne pouvez pas supprimer votre propre compte" });
-  }
-
-  const checkUserSql = "SELECT role FROM ADHERENT WHERE id_adherent = ?";
-  db.query(checkUserSql, [id], (err, users) => {
-    if (err) return res.status(500).json({ message: "Erreur serveur" });
-    if (users.length === 0) return res.status(404).json({ message: "Utilisateur non trouvé" });
-
-    const targetUser = users[0];
-    if (req.user.role === "admin" && targetUser.role !== "utilisateur") {
-      return res.status(403).json({ message: "Un admin ne peut supprimer que des utilisateurs simples" });
+    if (!req.user || (req.user.role !== "admin" && req.user.role !== "superadmin")) {
+        return res.status(403).json({ message: "Accès interdit" });
+    }
+    if (req.user.id === parseInt(id)) {
+        return res.status(403).json({ message: "Vous ne pouvez pas supprimer votre propre compte" });
     }
 
-    // Supprimer les matchs des réservations que cet adhérent possède
-    const deleteMatchsSql = `
+    const checkUserSql = "SELECT role FROM ADHERENT WHERE id_adherent = ?";
+    db.query(checkUserSql, [id], (err, users) => {
+        if (err) return res.status(500).json({ message: "Erreur serveur" });
+        if (users.length === 0) return res.status(404).json({ message: "Utilisateur non trouvé" });
+
+        const targetUser = users[0];
+        if (req.user.role === "admin" && targetUser.role !== "utilisateur") {
+            return res.status(403).json({ message: "Un admin ne peut supprimer que des utilisateurs simples" });
+        }
+
+        // Supprimer les matchs des réservations que cet adhérent possède
+        const deleteMatchsSql = `
       DELETE FROM matchs
       WHERE id_reservation IN (
         SELECT id_reservation FROM reservation WHERE id_adherent = ?
       )
     `;
-    db.query(deleteMatchsSql, [id], (err) => {
-      if (err) return res.status(500).json({ message: "Erreur serveur (matchs)" });
+        db.query(deleteMatchsSql, [id], (err) => {
+            if (err) return res.status(500).json({ message: "Erreur serveur (matchs)" });
 
-      // Supprimer toutes les liaisons adherent_reservation où il est PARTICIPANT (c'est ça qui te bloque)
-      const deleteARByAdherentSql = `
+            // Supprimer toutes les liaisons adherent_reservation où il est PARTICIPANT (c'est ça qui te bloque)
+            const deleteARByAdherentSql = `
         DELETE FROM adherent_reservation
         WHERE id_adherent = ?
       `;
-      db.query(deleteARByAdherentSql, [id], (err) => {
-        if (err) return res.status(500).json({ message: "Erreur serveur (adherent_reservation par adherent)" });
+            db.query(deleteARByAdherentSql, [id], (err) => {
+                if (err) return res.status(500).json({ message: "Erreur serveur (adherent_reservation par adherent)" });
 
-        // Supprimer les liaisons adherent_reservation des réservations qu’il possède (au cas où)
-        const deleteARByReservationSql = `
+                // Supprimer les liaisons adherent_reservation des réservations qu’il possède (au cas où)
+                const deleteARByReservationSql = `
           DELETE FROM adherent_reservation
           WHERE id_reservation IN (
             SELECT id_reservation FROM reservation WHERE id_adherent = ?
           )
         `;
-        db.query(deleteARByReservationSql, [id], (err) => {
-          if (err) return res.status(500).json({ message: "Erreur serveur (adherent_reservation par reservation)" });
+                db.query(deleteARByReservationSql, [id], (err) => {
+                    if (err) return res.status(500).json({ message: "Erreur serveur (adherent_reservation par reservation)" });
 
-          // Supprimer ses réservations
-          const deleteReservationSql = "DELETE FROM reservation WHERE id_adherent = ?";
-          db.query(deleteReservationSql, [id], (err) => {
-            if (err) return res.status(500).json({ message: "Erreur serveur (reservation)" });
+                    // Supprimer ses réservations
+                    const deleteReservationSql = "DELETE FROM reservation WHERE id_adherent = ?";
+                    db.query(deleteReservationSql, [id], (err) => {
+                        if (err) return res.status(500).json({ message: "Erreur serveur (reservation)" });
 
-            // licences
-            const deleteLicencesSql = "DELETE FROM licence WHERE id_adherent = ?";
-            db.query(deleteLicencesSql, [id], (err) => {
-              if (err) return res.status(500).json({ message: "Erreur serveur (licence)" });
+                        // licences
+                        const deleteLicencesSql = "DELETE FROM licence WHERE id_adherent = ?";
+                        db.query(deleteLicencesSql, [id], (err) => {
+                            if (err) return res.status(500).json({ message: "Erreur serveur (licence)" });
 
-              // commentaires
-              const deleteCommentairesSql = "DELETE FROM commentaire WHERE id_adherent = ?";
-              db.query(deleteCommentairesSql, [id], (err) => {
-                if (err) return res.status(500).json({ message: "Erreur serveur (commentaire)" });
+                            // commentaires
+                            const deleteCommentairesSql = "DELETE FROM commentaire WHERE id_adherent = ?";
+                            db.query(deleteCommentairesSql, [id], (err) => {
+                                if (err) return res.status(500).json({ message: "Erreur serveur (commentaire)" });
 
-                //supprimer l’adhérent
-                const deleteSql = "DELETE FROM ADHERENT WHERE id_adherent = ?";
-                db.query(deleteSql, [id], (err, result) => {
-                  if (err) return res.status(500).json({ message: "Erreur serveur (adherent)" });
-                  if (result.affectedRows === 0) return res.status(404).json({ message: "Utilisateur non trouvé" });
+                                //supprimer l’adhérent
+                                const deleteSql = "DELETE FROM ADHERENT WHERE id_adherent = ?";
+                                db.query(deleteSql, [id], (err, result) => {
+                                    if (err) return res.status(500).json({ message: "Erreur serveur (adherent)" });
+                                    if (result.affectedRows === 0) return res.status(404).json({ message: "Utilisateur non trouvé" });
 
-                  return res.status(200).json({ message: "Utilisateur supprimé avec succès" });
+                                    return res.status(200).json({ message: "Utilisateur supprimé avec succès" });
+                                });
+                            });
+                        });
+                    });
                 });
-              });
             });
-          });
         });
-      });
     });
-  });
 };
 
 
 
 
 // ----- STATISTICS ----- //
-export const getStats =(req, res) => {
-    try {
-        const sql = `
+export const getStats = (req, res) => {
+    const sql = `
             SELECT 
                 (SELECT COUNT(*) FROM adherent) AS total_users,
                 (SELECT COUNT(*) FROM club) AS total_clubs,
@@ -412,11 +411,17 @@ export const getStats =(req, res) => {
                 (SELECT COUNT(*) FROM reservation) AS total_reservations,
                 (SELECT COUNT(*) FROM matchs) AS total_matches
         `
+
+    db.query(sql, (err, result) => {
+        if (err) {
+            res.status(500).json({ error: "Erreur lors de la récupération des statistiques" })
+        }
+
+        if (result.length == 0) {
+            res.status(500).json({ error: "Aucune statistique" })
+        } else {
+            res.status(200).send(result[0])
+        }
         
-        const [results] = db.query(sql);
-        res.status(200).json(results[0]);
-    } catch (error) {
-        console.error('Erreur lors de la récupération des statistiques:', error);
-        res.status(500).json({ error: "Erreur lors de la récupération des statistiques" });
-    }
+    })
 }
