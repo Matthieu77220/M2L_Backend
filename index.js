@@ -10,7 +10,10 @@ import superadminRoutes from "./routes/superadmin.js";
 import profileRoutes from "./routes/profile.js";
 import ModifRoutes from "./routes/modifProfil.js";
 import terrainRoutes from "./routes/terrainAdmin.js";
-import adminRoutes from "./routes/admin_routes.js"
+import adminRoutes from "./routes/admin_routes.js";
+import terrainAdherentRoutes from './routes/terrain_adherent.js'
+
+
  
 import equipementRoutes from "./routes/equipement.js";
 import abonnementRoutes from "./routes/abonnements.js";
@@ -41,6 +44,7 @@ app.use("/api/admin", terrainRoutes);
 app.use("/api/admin", adminRoutes) 
 app.use("/api/equipement", equipementRoutes);
 app.use("/api/abonnements", abonnementRoutes);
+app.use("/api/terrain", terrainAdherentRoutes);
 
 app.get("/", (req, res) => {
   res.json("hello World");
