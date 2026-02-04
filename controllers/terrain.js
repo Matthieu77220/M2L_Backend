@@ -3,29 +3,38 @@ import 'dotenv/config'
 
 // ----- Visualiser les Terrains ----- //
 export const voirTerrain = (req, res) => {
-
     const id = req.user.id
 
-    // -- Récupère le terrain selon l'admin du club
-    const sql = ` SELECT * 
-                  FROM terrain
-                  WHERE id_club = (
-                        SELECT id_club
-                        FROM adherent
-                        WHERE id_adherent = ?
-                  )
-                  ORDER BY id_terrain ASC ; `
+    // Vérifie d'abord le rôle et l'id_club de l'utilisateur
+    const checkUserSql = `SELECT id_club, role FROM adherent WHERE id_adherent = ?`
 
-    db.query(sql, id, (err, result) => {
+    db.query(checkUserSql, id, (err, userResult) => {
         if (err) {
-            return res.status(500).send("Erreur lors de l'éxecution de la requêtes SQl.")
+            return res.status(500).send("Erreur lors de la vérification de l'utilisateur.")
         }
 
-        if (result) {
+        if (userResult.length === 0) {
+            return res.status(404).send("Utilisateur non trouvé.")
+        }
+
+        const user = userResult[0]
+        
+        // Si l'utilisateur a un club (admin), affiche seulement les terrains de son club
+        // Sinon (adhérent standard), affiche tous les terrains
+        const sql = user.id_club 
+            ? `SELECT * FROM terrain WHERE id_club = ? ORDER BY id_terrain ASC`
+            : `SELECT * FROM terrain ORDER BY id_terrain ASC`
+
+        const params = user.id_club ? [user.id_club] : []
+
+        db.query(sql, params, (err, result) => {
+            if (err) {
+                return res.status(500).send("Erreur lors de l'éxecution de la requête SQL.")
+            }
+
             return res.send(result)
-        }
+        })
     })
-
 }
 
 
