@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : mar. 20 jan. 2026 à 12:15
+-- Généré le : mer. 04 fév. 2026 à 12:24
 -- Version du serveur : 10.4.32-MariaDB
 -- Version de PHP : 8.2.12
 
@@ -29,7 +29,7 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `adherent` (
   `id_adherent` int(11) NOT NULL,
-  `id_club` INT NULL,
+  `id_club` int(11) DEFAULT NULL,
   `role` varchar(11) NOT NULL,
   `prenom` varchar(50) NOT NULL,
   `nom` varchar(50) NOT NULL,
@@ -39,7 +39,6 @@ CREATE TABLE `adherent` (
   `montant_cotisation` decimal(10,2) DEFAULT NULL,
   `mot_de_passe` varchar(255) NOT NULL,
   `debut_adhesion` date DEFAULT NULL,
-  `abonnement` varchar(10) DEFAULT NULL,
   `fin_adhesion` date DEFAULT NULL,
   `type_abonnement` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -48,17 +47,17 @@ CREATE TABLE `adherent` (
 -- Déchargement des données de la table `adherent`
 --
 
-INSERT INTO `adherent` (`id_adherent`, `role`, `prenom`, `nom`, `email`, `telephone`, `date_naissance`, `montant_cotisation`, `mot_de_passe`, `debut_adhesion`, `abonnement`, `fin_adhesion`, `type_abonnement`) VALUES
-(1, 'utilisateur', 'Lucas', 'Martin', 'martin.lucas@gmail.com', '0612345601', '1998-04-12', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', 'annuel', '2024-12-31', 'standard'),
-(2, 'utilisateur', 'Emma', 'Durand', 'durand.emma@gmail.com', '0612345602', '1999-06-23', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', 'annuel', '2024-12-31', 'standard'),
-(3, 'utilisateur', 'Nathan', 'Lefevre', 'lefevre.nathan@gmail.com', '0612345603', '2000-02-15', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', 'annuel', '2024-12-31', 'standard'),
-(4, 'utilisateur', 'Chloe', 'Moreau', 'moreau.chloe@gmail.com', '0612345604', '1997-11-30', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', 'annuel', '2024-12-31', 'standard'),
-(5, 'utilisateur', 'Hugo', 'Bernard', 'bernard.hugo@gmail.com', '0612345605', '1996-09-08', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', 'annuel', '2024-12-31', 'standard'),
-(6, 'utilisateur', 'Lea', 'Petit', 'petit.lea@gmail.com', '0612345606', '2001-01-19', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', 'annuel', '2024-12-31', 'standard'),
-(7, 'utilisateur', 'Tom', 'Roux', 'roux.tom@gmail.com', '0612345607', '1998-07-04', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', 'annuel', '2024-12-31', 'standard'),
-(8, 'utilisateur', 'Manon', 'Fournier', 'fournier.manon@gmail.com', '0612345608', '1999-12-14', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', 'annuel', '2024-12-31', 'standard'),
-(9, 'utilisateur', 'Alexis', 'Girard', 'girard.alexis@gmail.com', '0612345609', '1997-03-27', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', 'annuel', '2024-12-31', 'standard'),
-(10, 'utilisateur', 'Sarah', 'Lambert', 'lambert.sarah@gmail.com', '0612345610', '2000-10-05', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', 'annuel', '2024-12-31', 'standard');
+INSERT INTO `adherent` (`id_adherent`, `id_club`, `role`, `prenom`, `nom`, `email`, `telephone`, `date_naissance`, `montant_cotisation`, `mot_de_passe`, `debut_adhesion`, `fin_adhesion`, `type_abonnement`) VALUES
+(1, 1, 'utilisateur', 'Lucas', 'Martin', 'martin.lucas@gmail.com', '0612345601', '1998-04-12', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', '2024-12-31', 'standard'),
+(2, NULL, 'utilisateur', 'Emma', 'Durand', 'durand.emma@gmail.com', '0612345602', '1999-06-23', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', '2024-12-31', 'standard'),
+(3, NULL, 'utilisateur', 'Nathan', 'Lefevre', 'lefevre.nathan@gmail.com', '0612345603', '2000-02-15', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', '2024-12-31', 'standard'),
+(4, NULL, 'utilisateur', 'Chloe', 'Moreau', 'moreau.chloe@gmail.com', '0612345604', '1997-11-30', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', '2024-12-31', 'standard'),
+(5, NULL, 'utilisateur', 'Hugo', 'Bernard', 'bernard.hugo@gmail.com', '0612345605', '1996-09-08', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', '2024-12-31', 'standard'),
+(6, NULL, 'utilisateur', 'Lea', 'Petit', 'petit.lea@gmail.com', '0612345606', '2001-01-19', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', '2024-12-31', 'standard'),
+(7, NULL, 'utilisateur', 'Tom', 'Roux', 'roux.tom@gmail.com', '0612345607', '1998-07-04', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', '2024-12-31', 'standard'),
+(8, NULL, 'utilisateur', 'Manon', 'Fournier', 'fournier.manon@gmail.com', '0612345608', '1999-12-14', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', '2024-12-31', 'standard'),
+(9, NULL, 'utilisateur', 'Alexis', 'Girard', 'girard.alexis@gmail.com', '0612345609', '1997-03-27', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', '2024-12-31', 'standard'),
+(10, NULL, 'utilisateur', 'Sarah', 'Lambert', 'lambert.sarah@gmail.com', '0612345610', '2000-10-05', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', '2024-12-31', 'standard');
 
 -- --------------------------------------------------------
 
@@ -120,58 +119,6 @@ INSERT INTO `adherent_reservation` (`id_adherent`, `id_reservation`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `ballon`
---
-
-CREATE TABLE `ballon` (
-  `id_ballon` int(11) NOT NULL,
-  `stock_base` int(11) DEFAULT 20,
-  `stock_current` int(11) DEFAULT NULL,
-  `id_terrain` int(11) DEFAULT NULL,
-  `id_club` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Déchargement des données de la table `ballon`
---
-
-INSERT INTO `ballon` (`id_ballon`, `stock_base`, `stock_current`, `id_terrain`, `id_club`) VALUES
-(1, 20, 18, 1, 1),
-(2, 20, 16, 2, 1),
-(3, 20, 19, 3, 2),
-(4, 20, 17, 4, 2),
-(5, 20, 15, 5, 3),
-(6, 20, 18, 6, 3);
-
--- --------------------------------------------------------
-
---
--- Structure de la table `chasuble`
---
-
-CREATE TABLE `chasuble` (
-  `id_chasuble` int(11) NOT NULL,
-  `stock_base` int(11) DEFAULT 100,
-  `stock_current` int(11) DEFAULT NULL,
-  `id_terrain` int(11) DEFAULT NULL,
-  `id_club` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Déchargement des données de la table `chasuble`
---
-
-INSERT INTO `chasuble` (`id_chasuble`, `stock_base`, `stock_current`, `id_terrain`, `id_club`) VALUES
-(1, 100, 92, 1, 1),
-(2, 100, 88, 2, 1),
-(3, 100, 95, 3, 2),
-(4, 100, 90, 4, 2),
-(5, 100, 86, 5, 3),
-(6, 100, 93, 6, 3);
-
--- --------------------------------------------------------
-
---
 -- Structure de la table `club`
 --
 
@@ -195,28 +142,41 @@ INSERT INTO `club` (`id_club`, `nom`, `adresse`, `telephone`, `email`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `crampon`
+-- Structure de la table `equipements`
 --
 
-CREATE TABLE `crampon` (
-  `id_crampon` int(11) NOT NULL,
-  `stock_base` int(11) DEFAULT 100,
+CREATE TABLE `equipements` (
+  `id_equipement` int(11) NOT NULL,
+  `equipement` varchar(25) DEFAULT NULL,
+  `stock_base` int(11) DEFAULT NULL,
   `stock_current` int(11) DEFAULT NULL,
   `id_terrain` int(11) DEFAULT NULL,
   `id_club` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Déchargement des données de la table `crampon`
+-- Déchargement des données de la table `equipements`
 --
 
-INSERT INTO `crampon` (`id_crampon`, `stock_base`, `stock_current`, `id_terrain`, `id_club`) VALUES
-(1, 100, 84, 1, 1),
-(2, 100, 79, 2, 1),
-(3, 100, 91, 3, 2),
-(4, 100, 87, 4, 2),
-(5, 100, 76, 5, 3),
-(6, 100, 82, 6, 3);
+INSERT INTO `equipements` (`id_equipement`, `equipement`, `stock_base`, `stock_current`, `id_terrain`, `id_club`) VALUES
+(1, 'ballon', 20, 1, 1, 1),
+(2, 'ballon', 20, 16, 2, 1),
+(3, 'ballon', 20, 19, 3, 2),
+(4, 'ballon', 20, 17, 4, 2),
+(5, 'ballon', 20, 15, 5, 3),
+(6, 'ballon', 20, 18, 6, 3),
+(7, 'chasuble', 100, 92, 1, 1),
+(8, 'chasuble', 100, 88, 2, 1),
+(9, 'chasuble', 100, 95, 3, 2),
+(10, 'chasuble', 100, 90, 4, 2),
+(11, 'chasuble', 100, 86, 5, 3),
+(12, 'chasuble', 100, 93, 6, 3),
+(13, 'crampon', 100, 84, 1, 1),
+(14, 'crampon', 100, 79, 2, 1),
+(15, 'crampon', 100, 91, 3, 2),
+(16, 'crampon', 100, 87, 4, 2),
+(17, 'crampon', 100, 76, 5, 3),
+(18, 'crampon', 100, 82, 6, 3);
 
 -- --------------------------------------------------------
 
@@ -270,14 +230,14 @@ CREATE TABLE `matchs` (
 --
 
 INSERT INTO `matchs` (`id_match`, `id_reservation`, `score`, `status`, `nb_buts`, `nb_victoires`, `nb_egalites`, `nb_defaites`) VALUES
-(1, 1, '3-2', 'termine', 5, 1, 0, 0),
-(2, 2, '1-1', 'termine', 2, 0, 1, 0),
-(3, 3, '0-2', 'termine', 2, 0, 0, 1),
-(4, 4, '4-0', 'termine', 4, 1, 0, 0),
-(5, 5, '2-2', 'termine', 4, 0, 1, 0),
-(6, 6, '1-3', 'termine', 4, 0, 0, 1),
-(7, 7, '0-0', 'termine', 0, 0, 1, 0),
-(8, 8, '2-1', 'termine', 3, 1, 0, 0),
+(1, 1, '3-2', 'victoire', 5, 1, 0, 0),
+(2, 2, '1-1', 'egalite', 2, 0, 1, 0),
+(3, 3, '0-2', 'defaite', 2, 0, 0, 1),
+(4, 4, '4-0', 'victoire', 4, 1, 0, 0),
+(5, 5, '2-2', 'egalite', 4, 0, 1, 0),
+(6, 6, '1-3', 'defaite', 4, 0, 0, 1),
+(7, 7, '0-0', 'egalite', 0, 0, 1, 0),
+(8, 8, '2-1', 'victoire', 3, 1, 0, 0),
 (9, 9, '-', 'prevu', 0, 0, 0, 0),
 (10, 10, '-', 'prevu', 0, 0, 0, 0);
 
@@ -334,7 +294,8 @@ INSERT INTO `terrain` (`id_terrain`, `adresse`, `id_club`) VALUES
 (3, 'Complexe Sportif - Terrain Central, 91330 Yerres', 2),
 (4, 'Complexe Sportif - Terrain Annexe, 91330 Yerres', 2),
 (5, 'Stade de la Vallée - Terrain 1, 91800 Brunoy', 3),
-(6, 'Stade de la Vallée - Terrain 2, 91800 Brunoy', 3);
+(6, 'Stade de la Vallée - Terrain 2, 91800 Brunoy', 3),
+(7, '82 rue de magnyd', NULL);
 
 --
 -- Index pour les tables déchargées
@@ -355,32 +316,16 @@ ALTER TABLE `adherent_reservation`
   ADD KEY `id_reservation` (`id_reservation`);
 
 --
--- Index pour la table `ballon`
---
-ALTER TABLE `ballon`
-  ADD PRIMARY KEY (`id_ballon`),
-  ADD KEY `id_terrain` (`id_terrain`),
-  ADD KEY `id_club` (`id_club`);
-
---
--- Index pour la table `chasuble`
---
-ALTER TABLE `chasuble`
-  ADD PRIMARY KEY (`id_chasuble`),
-  ADD KEY `id_terrain` (`id_terrain`),
-  ADD KEY `id_club` (`id_club`);
-
---
 -- Index pour la table `club`
 --
 ALTER TABLE `club`
   ADD PRIMARY KEY (`id_club`);
 
 --
--- Index pour la table `crampon`
+-- Index pour la table `equipements`
 --
-ALTER TABLE `crampon`
-  ADD PRIMARY KEY (`id_crampon`),
+ALTER TABLE `equipements`
+  ADD PRIMARY KEY (`id_equipement`),
   ADD KEY `id_terrain` (`id_terrain`),
   ADD KEY `id_club` (`id_club`);
 
@@ -424,28 +369,10 @@ ALTER TABLE `adherent`
   MODIFY `id_adherent` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT pour la table `ballon`
---
-ALTER TABLE `ballon`
-  MODIFY `id_ballon` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- AUTO_INCREMENT pour la table `chasuble`
---
-ALTER TABLE `chasuble`
-  MODIFY `id_chasuble` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
 -- AUTO_INCREMENT pour la table `club`
 --
 ALTER TABLE `club`
   MODIFY `id_club` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT pour la table `crampon`
---
-ALTER TABLE `crampon`
-  MODIFY `id_crampon` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT pour la table `licence`
@@ -469,7 +396,7 @@ ALTER TABLE `reservation`
 -- AUTO_INCREMENT pour la table `terrain`
 --
 ALTER TABLE `terrain`
-  MODIFY `id_terrain` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id_terrain` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- Contraintes pour les tables déchargées
@@ -481,27 +408,6 @@ ALTER TABLE `terrain`
 ALTER TABLE `adherent_reservation`
   ADD CONSTRAINT `adherent_reservation_ibfk_1` FOREIGN KEY (`id_adherent`) REFERENCES `adherent` (`id_adherent`),
   ADD CONSTRAINT `adherent_reservation_ibfk_2` FOREIGN KEY (`id_reservation`) REFERENCES `reservation` (`id_reservation`);
-
---
--- Contraintes pour la table `ballon`
---
-ALTER TABLE `ballon`
-  ADD CONSTRAINT `ballon_ibfk_1` FOREIGN KEY (`id_terrain`) REFERENCES `terrain` (`id_terrain`),
-  ADD CONSTRAINT `ballon_ibfk_2` FOREIGN KEY (`id_club`) REFERENCES `club` (`id_club`);
-
---
--- Contraintes pour la table `chasuble`
---
-ALTER TABLE `chasuble`
-  ADD CONSTRAINT `chasuble_ibfk_1` FOREIGN KEY (`id_terrain`) REFERENCES `terrain` (`id_terrain`),
-  ADD CONSTRAINT `chasuble_ibfk_2` FOREIGN KEY (`id_club`) REFERENCES `club` (`id_club`);
-
---
--- Contraintes pour la table `crampon`
---
-ALTER TABLE `crampon`
-  ADD CONSTRAINT `crampon_ibfk_1` FOREIGN KEY (`id_terrain`) REFERENCES `terrain` (`id_terrain`),
-  ADD CONSTRAINT `crampon_ibfk_2` FOREIGN KEY (`id_club`) REFERENCES `club` (`id_club`);
 
 --
 -- Contraintes pour la table `licence`

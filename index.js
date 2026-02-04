@@ -13,6 +13,7 @@ import terrainRoutes from "./routes/terrainAdmin.js";
 import adminRoutes from "./routes/admin_routes.js"
  
 import equipementRoutes from "./routes/equipement.js";
+import abonnementRoutes from "./routes/abonnements.js";
 
 const app = express();
 
@@ -39,6 +40,7 @@ app.use("/api/modifProfil", ModifRoutes);
 app.use("/api/admin", terrainRoutes);
 app.use("/api/admin", adminRoutes) 
 app.use("/api/equipement", equipementRoutes);
+app.use("/api/abonnements", abonnementRoutes);
 
 app.get("/", (req, res) => {
   res.json("hello World");
