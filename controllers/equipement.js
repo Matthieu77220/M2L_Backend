@@ -6,10 +6,14 @@ export const stockChasuble = (req, res) => {
     // --- Récupération de l'id du club depuis le middleware ---
     const id = req.user.id
 
-    const sql = ` SELECT * FROM chasuble 
+    const sql = `
+                SELECT * FROM equipements 
                   WHERE id_club = (SELECT id_club 
                                                 from adherent 
-                                                WHERE id_adherent = ?); `
+                                                WHERE id_adherent = ?) 
+                    AND 
+                        equipement = "chasuble";
+                `
 
     db.query(sql, id, (err, results) => {
         if (err) {
@@ -27,10 +31,14 @@ export const stockCrampon = (req, res) => {
     // --- Récupération de l'id du club depuis le middleware ---
     const id = req.user.id
 
-    const sql = ` SELECT * FROM crampon 
+    const sql = `
+                SELECT * FROM equipements 
                   WHERE id_club = (SELECT id_club 
                                                 from adherent 
-                                                WHERE id_adherent = ?); `
+                                                WHERE id_adherent = ?) 
+                    AND 
+                        equipement = "crampon";
+                `
 
     db.query(sql, id, (err, results) => {
         if (err) {
@@ -50,10 +58,15 @@ export const stockBallon = (req, res) => {
     // --- Récupération de l'id du club depuis le middleware ---
     const id = req.user.id
 
-    const sql = ` SELECT * FROM ballon 
+    const sql = `
+                SELECT * FROM equipements 
                   WHERE id_club = (SELECT id_club 
                                                 from adherent 
-                                                WHERE id_adherent = ?); `
+                                                WHERE id_adherent = ?) 
+                    AND 
+                        equipement = "ballon";
+                `
+    
 
     db.query(sql, id, (err, results) => {
         if (err) {
