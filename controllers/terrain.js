@@ -5,7 +5,7 @@ import 'dotenv/config'
 export const voirTerrain = (req, res) => {
     const id = req.user.id
 
-    // Vérifie d'abord le rôle et l'id_club de l'utilisateur
+    
     const checkUserSql = `SELECT id_club, role FROM adherent WHERE id_adherent = ?`
 
     db.query(checkUserSql, id, (err, userResult) => {
