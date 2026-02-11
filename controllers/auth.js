@@ -8,6 +8,7 @@ export const inscription = (req, res) => {
 
     const {prenom, nom, email, dateDeNaissance, telephone, motDePasse} = req.body
 
+
     // --- Vérifications des inputs récupéré ---
     if (!prenom || !nom || !email || !dateDeNaissance || !telephone || !motDePasse) {
         return res.status(400).send("Champs manquants !")
