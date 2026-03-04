@@ -12,11 +12,9 @@ import ModifRoutes from "./routes/modifProfil.js";
 import terrainRoutes from "./routes/terrainAdmin.js";
 import adminRoutes from "./routes/admin_routes.js";
 import terrainAdherentRoutes from './routes/terrain_adherent.js'
-
-
- 
 import equipementRoutes from "./routes/equipement.js";
 import abonnementRoutes from "./routes/abonnements.js";
+import rejoindreMatchRoutes from "./routes/rejoindreMatch.js";
 
 const app = express();
 
@@ -45,6 +43,7 @@ app.use("/api/admin", adminRoutes)
 app.use("/api/equipement", equipementRoutes);
 app.use("/api/abonnements", abonnementRoutes);
 app.use("/api/terrain", terrainAdherentRoutes);
+app.use("/api/rejoindreMatch", rejoindreMatchRoutes);
 
 app.get("/", (req, res) => {
   res.json("hello World");
