@@ -3,20 +3,19 @@ import db from "../config/db.js"
 // ----- LICENCE ----- //
 export const rejoindreMatch = (req, res) => {
 
-    const {numero_reservation} = req.body    
+    const {numero_reservation} = req.body
 
     const id = req.user.id
 
     // Vérifie si le numéro de la réservation existe
-    const sql = ` SELECT numero_reservation
-                  FROM reservation 
-                  WHERE numero_reservation = "?"; ` // Rajouter dans la BDD numero_reservation
+    const sql = `SELECT id_reservation
+                  FROM reservation
+                  WHERE numero_reservation = ? ;`
 
     // Vérifie si l'utilisateur n'est pas déjà inscrit dans la réservation
-    const sql2 = ` SELECT a.id_adherent, a.id_reservation
+    const sql2 = ` SELECT *
                    from adherent_reservation as a
-                   JOIN reservation as r ON r.id_reservation = a.id_reservation
-                   WHERE r.numero_reservation = "?" AND a.id_adherent = ? `
+                   WHERE id_reservation = ? AND id_adherent = ? `
 
     // Ajoute l'utilisateur à la réservation
     const sql3 = ` INSERT INTO adherent_reservation(id_adherent, id_reservation)
@@ -25,36 +24,41 @@ export const rejoindreMatch = (req, res) => {
 
     // Numéro de la réservation existe
     db.query(sql, numero_reservation, (err, result) => {
+
         if (err) {
-            return res.status(500).send("Erreur lors de l'éxecution de la requêtes SQl.")
+            return res.status(500).send("Erreur SQL : vérification réservation")
         }
 
-        if (result) {
+        if (result.length === 0) {
+            return res.status(500).send({message : "Il n'existe pas de match avec ce code."})
+        }
+
+        // récupère l'id de la réservation
+        const id_reservation = result[0]["id_reservation"]
+
             // L'utilisateur n'est pas inscrit dans la réservation
-            db.query(sql2, [id, numero_reservation], (err, result) => {
+        db.query(sql2, [id_reservation, id], (err, result2) => {
+
+            if (err) {
+                return res.status(500).send("Erreur SQL : vérification inscription")
+            }
+
+            if (result2.length > 0) {    
+                return res.send({message: "Vous êtes déjà inscrit à cette réservation."})
+                
+            }
+
+            // Ajout l'utlisateur à la réservation
+            db.query(sql3, [id, id_reservation], (err, result3) => {
                 if (err) {
-                    return res.status(500).send("Erreur lors de l'éxecution de la requêtes SQl.")
+                    return res.status(500).send("Erreur SQL : insertion de l'utilisateur.")
                 }
-
-                if (result != 0) {
-                    return res.send({message: "Vous êtes déjà inscrit à cette réservation."})
-                    
-                }else {
-                    // Ajout l'utlisateur à la réservation
-                    db.query(sql3, [id, numero_reservation], (err, result) => {
-                        if (err) {
-                            return res.status(500).send("Erreur lors de l'éxecution de la requêtes SQl.")
-                        }
-
-                        if (result) {
-                            return res.send({message: "Inscription réussie !"})
-                        }
-                    })
+                if (result3) {
+                    return res.send({message: "Inscription réussie !"})
                 }
             })
-        }else {
-            return res.send({message: "Il n'existe pas de match correspondant à votre numéro de réservation."})
-        }
+            
+        })
     })
 
 }
