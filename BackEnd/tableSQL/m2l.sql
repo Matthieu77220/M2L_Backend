@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : mer. 04 fév. 2026 à 12:24
+-- Généré le : lun. 09 mars 2026 à 13:17
 -- Version du serveur : 10.4.32-MariaDB
 -- Version de PHP : 8.2.12
 
@@ -48,7 +48,7 @@ CREATE TABLE `adherent` (
 --
 
 INSERT INTO `adherent` (`id_adherent`, `id_club`, `role`, `prenom`, `nom`, `email`, `telephone`, `date_naissance`, `montant_cotisation`, `mot_de_passe`, `debut_adhesion`, `fin_adhesion`, `type_abonnement`) VALUES
-(1, 1, 'utilisateur', 'Lucas', 'Martin', 'martin.lucas@gmail.com', '0612345601', '1998-04-12', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', '2024-12-31', 'standard'),
+(1, 1, 'superAdmin', 'Lucas', 'Martin', 'martin.lucas@gmail.com', '0612345601', '1998-04-12', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', '2024-12-31', 'Mensuel'),
 (2, NULL, 'utilisateur', 'Emma', 'Durand', 'durand.emma@gmail.com', '0612345602', '1999-06-23', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', '2024-12-31', 'standard'),
 (3, NULL, 'utilisateur', 'Nathan', 'Lefevre', 'lefevre.nathan@gmail.com', '0612345603', '2000-02-15', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', '2024-12-31', 'standard'),
 (4, NULL, 'utilisateur', 'Chloe', 'Moreau', 'moreau.chloe@gmail.com', '0612345604', '1997-11-30', 120.00, '$2b$10$74HlPg2KAsqpDeVk3CHt7Oi1ZKWGUbEmndf43Yz36SDBLQxxMDjBu', '2024-01-01', '2024-12-31', 'standard'),
@@ -76,6 +76,7 @@ CREATE TABLE `adherent_reservation` (
 
 INSERT INTO `adherent_reservation` (`id_adherent`, `id_reservation`) VALUES
 (1, 1),
+(1, 2),
 (1, 4),
 (1, 6),
 (1, 9),
@@ -136,7 +137,7 @@ CREATE TABLE `club` (
 
 INSERT INTO `club` (`id_club`, `nom`, `adresse`, `telephone`, `email`) VALUES
 (1, 'FC Montgeron', '12 Rue de la République, 91230 Montgeron', '0169401101', 'contact@fcmontgeron.fr'),
-(2, 'AS Yerres', '4 Avenue du Stade, 91330 Yerres', '0169401102', 'contact@asyerres.fr'),
+(2, 'AS Yerres', '4 Avenue du Stade, 91330 Yerres', '0632131029', 'contact@asyerres.fr'),
 (3, 'US Brunoy', '18 Boulevard des Sports, 91800 Brunoy', '0169401103', 'contact@usbrunoy.fr');
 
 -- --------------------------------------------------------
@@ -253,24 +254,25 @@ CREATE TABLE `reservation` (
   `id_terrain` int(11) DEFAULT NULL,
   `date_reservation` date DEFAULT NULL,
   `heure_debut` time DEFAULT NULL,
-  `heure_fin` time DEFAULT NULL
+  `heure_fin` time DEFAULT NULL,
+  `numero_reservation` int(6) NOT NULL UNIQUE,
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Déchargement des données de la table `reservation`
 --
 
-INSERT INTO `reservation` (`id_reservation`, `id_adherent`, `id_terrain`, `date_reservation`, `heure_debut`, `heure_fin`) VALUES
-(1, 1, 1, '2024-02-03', '18:00:00', '19:30:00'),
-(2, 2, 2, '2024-02-04', '19:00:00', '20:30:00'),
-(3, 3, 3, '2024-02-05', '18:30:00', '20:00:00'),
-(4, 4, 4, '2024-02-06', '20:00:00', '21:30:00'),
-(5, 5, 5, '2024-02-07', '17:30:00', '19:00:00'),
-(6, 6, 6, '2024-02-08', '19:30:00', '21:00:00'),
-(7, 7, 1, '2024-02-10', '16:00:00', '17:30:00'),
-(8, 8, 3, '2024-02-11', '18:00:00', '19:30:00'),
-(9, 9, 5, '2024-02-12', '19:00:00', '20:30:00'),
-(10, 10, 2, '2024-02-13', '18:30:00', '20:00:00');
+INSERT INTO `reservation` (`id_reservation`, `id_adherent`, `id_terrain`, `date_reservation`, `heure_debut`, `heure_fin`, `numero_reservation`) VALUES
+(1, 1, 1, '2024-02-03', '18:00:00', '19:30:00', 153156),
+(2, 2, 2, '2024-02-04', '19:00:00', '20:30:00', 664464),
+(3, 3, 3, '2024-02-05', '18:30:00', '20:00:00', 915163),
+(4, 4, 4, '2024-02-06', '20:00:00', '21:30:00', 178364),
+(5, 5, 5, '2024-02-07', '17:30:00', '19:00:00', 312093),
+(6, 6, 6, '2024-02-08', '19:30:00', '21:00:00', 131389),
+(7, 7, 1, '2024-02-10', '16:00:00', '17:30:00', 634235),
+(8, 8, 3, '2024-02-11', '18:00:00', '19:30:00', 317874),
+(9, 9, 5, '2024-02-12', '19:00:00', '20:30:00', 931841),
+(10, 10, 2, '2024-02-13', '18:30:00', '20:00:00', 883184);
 
 -- --------------------------------------------------------
 
@@ -294,8 +296,7 @@ INSERT INTO `terrain` (`id_terrain`, `adresse`, `id_club`) VALUES
 (3, 'Complexe Sportif - Terrain Central, 91330 Yerres', 2),
 (4, 'Complexe Sportif - Terrain Annexe, 91330 Yerres', 2),
 (5, 'Stade de la Vallée - Terrain 1, 91800 Brunoy', 3),
-(6, 'Stade de la Vallée - Terrain 2, 91800 Brunoy', 3),
-(7, '82 rue de magnyd', NULL);
+(6, 'Stade de la Vallée - Terrain 2, 91800 Brunoy', 3);
 
 --
 -- Index pour les tables déchargées
@@ -366,7 +367,7 @@ ALTER TABLE `terrain`
 -- AUTO_INCREMENT pour la table `adherent`
 --
 ALTER TABLE `adherent`
-  MODIFY `id_adherent` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id_adherent` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT pour la table `club`
