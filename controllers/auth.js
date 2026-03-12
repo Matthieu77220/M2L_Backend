@@ -68,7 +68,8 @@ export const inscription = (req, res) => {
                     return res.json({
                         message: "Adherent ajouté avec succès !",
                         id: user,
-                        role: "utilisateur"
+                        role: "utilisateur",
+                        token: token
                     })
                 })
             }
@@ -134,7 +135,8 @@ export const connexion = (req, res) => {
             return res.json({ 
                 message: "Vous êtes connecté !",
                 role: user.role,
-                id: user.id_adherent
+                id: user.id_adherent,
+                token: token
             });
         });
     })
