@@ -152,28 +152,94 @@ export const deconnexion = (req, res) => {
 }
 
 // ----- SUPPRESSION ----- //
+
+
 export const suppressionCompte = (req, res) => {
 
     // --- Récupération de l'id de l'adherent depuis le middleware ---
     const id = req.user.id
 
-    // --- Préparation de la requete préparée pour Supprimer le compte ---
-    // L’utilisateur peut récupérer ses données des autres tables après avoir delete son compte ??? (à voir)
-    const sql = 'DELETE FROM adherent where id_adherent = ?;'
-
-    db.query(sql, [id], (err, results) => {
+    
+    // Supprimer les matchs des réservations que cet adhérent possède
+    const deleteMatchsSql = `
+      DELETE FROM matchs
+      WHERE id_reservation IN (
+        SELECT id_reservation FROM reservation WHERE id_adherent = ?
+      )
+    `;
+    db.query(deleteMatchsSql, [id], (err) => {
         if (err) {
-            return res.status(500).send("Erreur lors de l'execution de la requête.")
+            console.log(err);
+            return res.status(500).send("Erreur lors de la suppression des matchs.")
         }
-        
-        res.clearCookie("token", {
-          httpOnly: true,
-          secure: false
-        })
-        
-        return res.send("User supprimé avec succès.")
+        console.log("Matchs supprimés avec succès.")
+        // Supprimer toutes les liaisons adherent_reservation où il est PARTICIPANT
+        const deleteARByAdherentSql = `
+        DELETE FROM adherent_reservation
+        WHERE id_adherent = ?
+      `;
+        db.query(deleteARByAdherentSql, [id], (err) => {
+            if (err) {
+                console.log(err);
+                return res.status(500).send("Erreur lors de la suppression des réservations d'adhérent.")
+            }
+            console.log("Liaisons adherent_reservation supprimées avec succès.")
+            // Supprimer les liaisons adherent_reservation des réservations qu'il possède
+            const deleteARByReservationSql = `
+          DELETE FROM adherent_reservation
+          WHERE id_reservation IN (
+            SELECT id_reservation FROM reservation WHERE id_adherent = ?
+          )
+        `;
+            db.query(deleteARByReservationSql, [id], (err) => {
+                if (err) {
+                    console.log(err);
+                    return res.status(500).send("Erreur lors de la suppression des réservations.")
+                }
+                console.log("Liaisons adherent_reservation supprimées avec succès.")
+                // Supprimer ses réservations
+                const deleteReservationSql = "DELETE FROM reservation WHERE id_adherent = ?";
+                db.query(deleteReservationSql, [id], (err) => {
+                    if (err) {
+                        console.log(err);
+                        return res.status(500).send("Erreur lors de la suppression des réservations principales.")
+                    }
+                    console.log("Réservations supprimées avec succès.")
+                    // Supprimer les licences
+                    const deleteLicencesSql = "DELETE FROM licence WHERE id_adherent = ?";
+                    db.query(deleteLicencesSql, [id], (err) => {
+                        if (err) {
+                            console.log(err);
+                            return res.status(500).send("Erreur lors de la suppression des licences.")
+                        }
+                        console.log("Licences supprimées avec succès.")
+                        // Supprimer les commentaires
+                        
+                            // Supprimer l'adhérent
+                            const deleteSql = "DELETE FROM adherent WHERE id_adherent = ?";
+                            db.query(deleteSql, [id], (err, results) => {
+                                if (err) {
+                                    console.log(err);
+                                    return res.status(500).send("Erreur lors de la suppression du compte.")
+                                }
+                                console.log("Adhérent supprimé avec succès.")
+                                res.clearCookie("token", {
+                                    httpOnly: true,
+                                    secure: false
+                                })
+
+                                return res.send("User supprimé avec succès.")
+                            });
+                     
+                    });
+                });
+            });
+        });
     })
+    
+
 }
+
 
 // ----- Modifier MDP ----- //
 export const modifierMotDePasse = (req, res) => {
