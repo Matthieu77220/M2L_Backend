@@ -50,8 +50,8 @@ export const inscription = (req, res) => {
                     // Ajout du numero de l'adherent dans la table licence
                     let numero_adherent = "LIC";
 
-                    for (let index = 0; index < 5; index++) {
-                        const nombre_aleatoire = Math.floor(Math.random() * 10);
+                    for (let index = 0; index < 5; index++) { // Boucle 5 fois
+                        const nombre_aleatoire = Math.floor(Math.random() * 10); // Donne un nombre aléatoire compris entre 0 et 9 inclus
                         numero_adherent += nombre_aleatoire.toString();
                     }
 
