@@ -79,59 +79,69 @@ export const inscription = (req, res) => {
 
 // ----- CONNEXION ----- //
 export const connexion = (req, res) => {
+
+    // Récupération des données envoyées par le client (body de la requête)
     const { email, motDePasse } = req.body
 
-    // --- Vérifications des inputs récupéré ---
+    // --- Vérification des champs ---
+    // On vérifie que tous les champs sont présents
     if (!email || !motDePasse) {
         return res.status(400).send("Champs manquants !")
     }
 
+    // Vérification de la longueur du mot de passe (sécurité)
     if (motDePasse.length < 12) {
         return res.status(400).send("Mot de passe trop court !")
     }
 
-    // --- Préparation de la requete préparée pour Vérifier l'Email ---
-
+    // --- Requête SQL préparée ---
+    // Permet d'éviter les injections SQL grâce au "?"
     const sql = "SELECT * from adherent WHERE email = ? ;"
 
     db.query(sql, [email], (err, results) => {
 
+        // Gestion des erreurs serveur
         if (err) {
             return res.status(500).send("Erreur lors de la recherche de l'adherent !");
         }
 
+        // Vérifie si l'utilisateur existe
         if (results.length === 0) {
             return res.status(404).send("L'email n'existe pas !");
         }
 
+        // Récupération de l'utilisateur trouvé
         const user = results[0];
 
-        // --- Compare le mot de passe ---
+        // --- Vérification du mot de passe ---
+        // Compare le mot de passe saisi avec celui en base (hashé)
         bcrypt.compare(motDePasse, user.mot_de_passe, (err, match) => {
 
             if (err) {
                 return res.status(500).send("Erreur lors de la vérification du mot de passe !");
             }
 
+            // Si le mot de passe ne correspond pas
             if (!match) {
                 return res.status(401).send("Mot de passe incorrect !");
             }
 
-            // --- Création du token ---
+            // --- Génération du token JWT ---
+            // Contient les infos utiles de l'utilisateur (id + rôle)
             const token = jwt.sign(
                 { id: user.id_adherent, role: user.role },
                 process.env.secretKey,
-                { expiresIn: "24h" }
+                { expiresIn: "24h" } // durée de validité
             );
 
-            // --- Cookie sécurisé ---
+            // --- Création d'un cookie sécurisé ---
             res.cookie("token", token, {
-                httpOnly: true,
-                secure: false,
-                maxAge: 24 * 60 * 60 * 1000,//24h
-
+                httpOnly: true, // empêche accès JS (sécurité XSS)
+                secure: false,  // true en production (HTTPS)
+                maxAge: 24 * 60 * 60 * 1000 // 24h
             });
             
+            // Réponse envoyée au client
             return res.json({ 
                 message: "Vous êtes connecté !",
                 role: user.role,
@@ -141,6 +151,7 @@ export const connexion = (req, res) => {
         });
     })
 }
+
 
 // ----- DECONNEXION ----- //
 export const deconnexion = (req, res) => {
