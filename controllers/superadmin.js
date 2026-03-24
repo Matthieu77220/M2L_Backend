@@ -40,7 +40,7 @@ export const getAllClubs = (req, res) => {
         LEFT JOIN adherent a ON a.id_club = c.id_club
         LEFT JOIN terrain t ON t.id_club = c.id_club
         GROUP BY c.id_club, c.nom, c.adresse, c.telephone, c.email
-        ORDER BY c.nom ASC
+        ORDER BY c.id_club ASC
     `
     
     db.query(sql, (err, results) => {
@@ -169,7 +169,7 @@ export const getAllUsers = (req, res) => {
             id_club,
             type_abonnement
         FROM adherent
-        ORDER BY nom ASC, prenom ASC
+        ORDER BY id_adherent ASC, prenom ASC
     `
     
     db.query(sql, (err, results) => {
