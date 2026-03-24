@@ -47,6 +47,26 @@ export const inscription = (req, res) => {
                         res.status(500).send("Erreur lors de l'ajout de l'adherent dans la Base De Données")
                     }
 
+                    // Ajout du numero de l'adherent dans la table licence
+                    let numero_adherent = "LIC";
+
+                    for (let index = 0; index < 5; index++) {
+                        const nombre_aleatoire = Math.floor(Math.random() * 10);
+                        numero_adherent += nombre_aleatoire.toString();
+                    }
+
+                    const sqlLicence = `INSERT INTO licence (numero_adherent, debut_licence, fin_licence, id_adherent)
+                                        VALUES (?, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 1 YEAR), ?);
+                                        `
+
+                    db.query(sqlLicence, [numero_adherent, match.insertId], (err, result) => {
+                        if (err) {
+                            console.log(err);
+                            return res.status(500).send("Erreur lors de l'ajout de la licence.")
+                        }
+                        console.log("Licence ajoutée avec succès.")
+                    })
+
                     // On récupère dans l'object match la clé insertId | on ne peut pas faire match[0].id_adherent car seulement pour les SELECT
                     const user = match.insertId
 
