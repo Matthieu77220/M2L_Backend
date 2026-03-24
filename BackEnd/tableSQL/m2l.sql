@@ -255,7 +255,7 @@ CREATE TABLE `reservation` (
   `date_reservation` date DEFAULT NULL,
   `heure_debut` time DEFAULT NULL,
   `heure_fin` time DEFAULT NULL,
-  `numero_reservation` int(6) NOT NULL UNIQUE,
+  `numero_reservation` int(6) NOT NULL UNIQUE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
