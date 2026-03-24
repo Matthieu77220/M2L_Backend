@@ -100,13 +100,10 @@ export const supprimerTerrain = (req, res) => {
 
     // -- Suppression des Foreign Key et le terrain
     const sqlDeleteFK = `
-                        DELETE FROM chasuble WHERE id_terrain = ?;
-                        DELETE FROM crampon  WHERE id_terrain = ?;
-                        DELETE FROM ballon   WHERE id_terrain = ?;
-                        DELETE FROM reservation WHERE id_terrain = ?;
+                        DELETE FROM equipements WHERE id_terrain = ?;
                         DELETE FROM terrain WHERE id_terrain = ?;`
 
-    db.query(sqlDeleteFK, [id_terrain, id_terrain, id_terrain, id_terrain, id_terrain], (err, result) => {
+    db.query(sqlDeleteFK, [id_terrain, id_terrain], (err, result) => {
         if (err) {
             return res.status(500).send("Erreur lors de l'éxecution de la requêtes SQl.")
         }
