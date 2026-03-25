@@ -5,7 +5,7 @@ const isAdmin = (req, res, next) => {
     const token = req.cookies['token'];
     const tokenMobile = req.headers.authorization?.split(" ")[1];
 
-
+    // -- Pas de token --
     if (!token && !tokenMobile) {
         return res.status(401).json({ message: "Token manquant" });
     }
@@ -14,6 +14,7 @@ const isAdmin = (req, res, next) => {
 
         let user
 
+        // -- Selon le type d'appareil qu'on utilise on vérifie le jwt --
         if (tokenMobile) {
             user = jwt.verify(tokenMobile, process.env.secretKey)
         } else {
@@ -22,7 +23,7 @@ const isAdmin = (req, res, next) => {
         
         req.user = user;
 
- 
+        // -- On vérifie le rôle --
         if (user.role === 'admin' || user.role === 'superAdmin') {
             next();
         } else {

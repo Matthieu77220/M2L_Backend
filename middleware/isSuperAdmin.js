@@ -4,8 +4,9 @@ import 'dotenv/config'
 
 const isSuperAdmin = (req, res, next) => {
     const token = req.cookies['token']
-    const tokenMobile = req.headers.authorization?.split(" ")[1]
+    const tokenMobile = req.headers.authorization?.split(" ")[1] // APP Mobile : Split l'espace dans le headeder 'Bearer $token' = [Bearer, token] et récupère l'index 1
 
+    // -- Pas de token --
     if (!token && !tokenMobile) {
         return res.status(401).json({ message: "Token manquant" })
     }
@@ -14,12 +15,14 @@ const isSuperAdmin = (req, res, next) => {
 
         let user
 
+        // -- Selon le type d'appareil qu'on utilise on vérifie le jwt --
         if(tokenMobile) {
             user = jwt.verify(tokenMobile, process.env.secretKey)
         } else {
             user = jwt.verify(token, process.env.secretKey)
         }
 
+        // -- On vérifie le rôle --
         if (user.role === "superAdmin") {
             req.user = user
             next()
@@ -27,7 +30,6 @@ const isSuperAdmin = (req, res, next) => {
             return res.status(403).json({ message: "Accès interdit : vous n'avez pas les droits !" })
         }
     } catch (err) {
-        console.error('Erreur JWT:', err)
         res.clearCookie("token")
         return res.status(401).json({ message: "Token invalide" })
     }
