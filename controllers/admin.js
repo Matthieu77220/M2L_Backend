@@ -239,7 +239,7 @@ export const updateUser = (req, res) => {
                         console.error('Erreur lors de la mise à jour:', err);
                         return res.status(500).json({ message: 'Erreur serveur' });
                     }
-                    
+
                     res.status(200).json({ message: 'Utilisateur modifié avec succès' });
                 });
             };
@@ -368,20 +368,14 @@ export const deleteUser = (req, res) => {
                         const deleteLicencesSql = "DELETE FROM licence WHERE id_adherent = ?";
                         db.query(deleteLicencesSql, [id], (err) => {
                             if (err) return res.status(500).json({ message: "Erreur serveur (licence)" });
+                            
+                            //supprimer l’adhérent
+                            const deleteSql = "DELETE FROM ADHERENT WHERE id_adherent = ?";
+                            db.query(deleteSql, [id], (err, result) => {
+                                if (err) return res.status(500).json({ message: "Erreur serveur (adherent)" });
+                                if (result.affectedRows === 0) return res.status(404).json({ message: "Utilisateur non trouvé" });
 
-                            //commentaires
-                            const deleteCommentairesSql = "DELETE FROM commentaire WHERE id_adherent = ?";
-                            db.query(deleteCommentairesSql, [id], (err) => {
-                                if (err) return res.status(500).json({ message: "Erreur serveur (commentaire)" });
-
-                                //supprimer l’adhérent
-                                const deleteSql = "DELETE FROM ADHERENT WHERE id_adherent = ?";
-                                db.query(deleteSql, [id], (err, result) => {
-                                    if (err) return res.status(500).json({ message: "Erreur serveur (adherent)" });
-                                    if (result.affectedRows === 0) return res.status(404).json({ message: "Utilisateur non trouvé" });
-
-                                    return res.status(200).json({ message: "Utilisateur supprimé avec succès" });
-                                });
+                                return res.status(200).json({ message: "Utilisateur supprimé avec succès" });
                             });
                         });
                     });
@@ -416,6 +410,6 @@ export const getStats = (req, res) => {
         } else {
             res.status(200).send(result[0])
         }
-        
+
     })
 }
