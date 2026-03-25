@@ -16,6 +16,7 @@ import equipementRoutes from "./routes/equipement.js";
 import abonnementRoutes from "./routes/abonnements.js";
 import rejoindreMatchRoutes from "./routes/rejoindreMatch.js";
 import voirClubRoutes from "./routes/voirClub.js"
+import reservationRoutes from "./routes/reservation.js"
 
 
 const app = express();
@@ -24,7 +25,7 @@ app.use(cookieParser());
 
 // ----- CORS -----
 const corsOptions = {
-  origin: "http://localhost:5173",
+  origin: "http://localhost:54881",
   credentials: true,
 };
 
@@ -47,6 +48,7 @@ app.use("/api/abonnements", abonnementRoutes);
 app.use("/api/terrain", terrainAdherentRoutes);
 app.use("/api/rejoindreMatch", rejoindreMatchRoutes);
 app.use("/api/club", voirClubRoutes);
+app.use("/api/reservation", reservationRoutes);
 
 app.get("/", (req, res) => {
   res.json("hello World");
