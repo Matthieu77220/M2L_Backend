@@ -1,6 +1,7 @@
 import db from "../config/db.js"
 import 'dotenv/config'
 
+// ----- Modification du Profil ----- //
 export const modificationProfile = (req, res) => {
     const { prenom, nom, email, dateDeNaissance, telephone } = req.body    
     

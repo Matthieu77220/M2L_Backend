@@ -53,8 +53,6 @@ export const createUser = (req, res) => {
         type_abonnement
     } = req.body;
 
-    console.log('Route POST /api/admin/users appelée');
-
     if (!email || !mot_de_passe || !prenom || !nom || !role || !telephone || !date_naissance) {
         return res.status(400).json({ message: 'Champs requis manquants' });
     }
@@ -122,7 +120,6 @@ export const createUser = (req, res) => {
                     return res.status(500).json({ message: 'Erreur serveur' });
                 }
 
-                console.log('Utilisateur créé avec ID:', result.insertId);
                 res.status(201).json({
                     message: 'Utilisateur créé avec succès',
                     userId: result.insertId
@@ -148,8 +145,6 @@ export const updateUser = (req, res) => {
         fin_adhesion,
         type_abonnement
     } = req.body;
-
-    console.log('Route PUT /api/admin/users/:id appelée pour id:', id);
 
     if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'superadmin')) {
         return res.status(403).json({ message: 'Accès interdit' });
@@ -244,8 +239,7 @@ export const updateUser = (req, res) => {
                         console.error('Erreur lors de la mise à jour:', err);
                         return res.status(500).json({ message: 'Erreur serveur' });
                     }
-
-                    console.log('Utilisateur modifié avec succès');
+                    
                     res.status(200).json({ message: 'Utilisateur modifié avec succès' });
                 });
             };
