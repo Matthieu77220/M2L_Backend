@@ -1,18 +1,7 @@
 import express from "express"
 import isSuperAdmin from "../middleware/isSuperAdmin.js"
-import {
-    getDashboardStats,
-    getAllClubs,
-    getClubById,
-    createClub,
-    updateClub,
-    deleteClub,
-    getAllUsers,
-    getUserById,
-    updateUser,
-    deleteUser,
-    getGlobalStats
-} from "../controllers/superadmin.js"
+import { getDashboardStats, getAllClubs, getClubById, createClub, updateClub, deleteClub, getAllUsers, getUserById, updateUser, deleteUser, getGlobalStats
+        } from "../controllers/superadmin.js"
 
 const router = express.Router()
 

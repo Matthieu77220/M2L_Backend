@@ -5,6 +5,7 @@ import { voirTerrain } from '../controllers/terrain.js'
 
 const router = express.Router()
 
+// Chemins des routes -> controllers
 router.get("/voirTerrain", cookieJwt, voirTerrain)
 
 export default router
