@@ -375,7 +375,7 @@ export const deleteUser = (req, res) => {
                         db.query(deleteLicencesSql, [id], (err) => {
                             if (err) return res.status(500).json({ message: "Erreur serveur (licence)" });
 
-                            // commentaires
+                            //commentaires
                             const deleteCommentairesSql = "DELETE FROM commentaire WHERE id_adherent = ?";
                             db.query(deleteCommentairesSql, [id], (err) => {
                                 if (err) return res.status(500).json({ message: "Erreur serveur (commentaire)" });

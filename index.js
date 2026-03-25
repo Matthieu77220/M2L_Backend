@@ -24,7 +24,16 @@ app.use(cookieParser());
 
 // ----- CORS -----
 const corsOptions = {
-  origin: "http://localhost:5173",
+  origin: (origin, callback) => {
+    // autorise les requêtes sans origin
+    if (!origin) return callback(null, true);
+
+    if (origin.startsWith('http://localhost')) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
 };
 
