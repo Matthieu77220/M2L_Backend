@@ -1,13 +1,13 @@
 import db from "../config/db.js"
 import 'dotenv/config'
 
-// ----- LICENCE ----- //
+// ----- Visualisation des données de l'Adherent ----- //
 export const voirProfile = (req, res) => {
 
     // --- Récupération de l'id de l'adherent depuis le middleware ---
     const id = req.user.id
 
-    // --- Préparation de la requete préparée pour Afficher les informations de la licence ---
+    // --- Préparation de la requete préparée pour Afficher les informations de l'adherent ---
     const sql = ` SELECT nom, prenom, date_naissance, email, telephone
                   FROM adherent
                   WHERE id_adherent = ? ; `

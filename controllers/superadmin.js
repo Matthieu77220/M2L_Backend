@@ -4,7 +4,7 @@ import 'dotenv/config'
 // ----- STATISTICS DASHBOARD ----- //
 export const getDashboardStats = (req, res) => {
     
-    
+    // -- Récupération des totaux des adherents,clubs,licences,reservation,maths --
     const sql = `
         SELECT 
             (SELECT COUNT(*) FROM adherent) AS total_users,
@@ -26,7 +26,7 @@ export const getDashboardStats = (req, res) => {
 // ----- GET ALL CLUBS ----- //
 export const getAllClubs = (req, res) => {
    
-    
+    // Récupère les informations de tous les clubs
     const sql = `
         SELECT 
             c.id_club,
@@ -51,12 +51,13 @@ export const getAllClubs = (req, res) => {
     })
 }
 
-// ----- GET SINGLE CLUB ----- //
+// ----- GET Récupération des données du CLUB ----- //
 export const getClubById = (req, res) => {
    
     
     const { id } = req.params
     
+    // Récupère les données d'un club
     const sql = `
         SELECT 
             c.id_club,
@@ -94,6 +95,7 @@ export const createClub = (req, res) => {
         return res.status(400).json({ error: "Tous les champs sont obligatoires" })
     }
     
+    // Crée un nouveau club
     const sql = "INSERT INTO club (nom, adresse, telephone, email) VALUES (?, ?, ?, ?)"
     
     db.query(sql, [nom, adresse, telephone, email], (err, results) => {
@@ -118,6 +120,7 @@ export const updateClub = (req, res) => {
         return res.status(400).json({ error: "Tous les champs sont obligatoires" })
     }
     
+    // Met à jour les informations d'un club
     const sql = "UPDATE club SET nom = ?, adresse = ?, telephone = ?, email = ? WHERE id_club = ?"
     
     db.query(sql, [nom, adresse, telephone, email, id], (err, results) => {
@@ -153,7 +156,7 @@ export const deleteClub = (req, res) => {
 // ----- GET ALL USERS ----- //
 export const getAllUsers = (req, res) => {
     
-    
+    // Récupère toutes les données de tous les adhérents
     const sql = `
         SELECT 
             id_adherent,
@@ -182,7 +185,6 @@ export const getAllUsers = (req, res) => {
 
 // ----- GET SINGLE USER ----- //
 export const getUserById = (req, res) => {
-    // // const userRole = req.user.role; // Vérification role superadmin à ajouter plus tard
     
     const { id } = req.params
     
@@ -230,11 +232,7 @@ export const updateUser = (req, res) => {
 // ----- DELETE USER ----- //
 export const deleteUser = (req, res) => {
    
-    
     const { id } = req.params
-    
- 
-
     
     // Supprimer les matchs des réservations que cet adhérent possède
     const deleteMatchsSql = `
@@ -245,60 +243,49 @@ export const deleteUser = (req, res) => {
     `;
     db.query(deleteMatchsSql, [id], (err) => {
         if (err) {
-            console.log(err);
             return res.status(500).send("Erreur lors de la suppression des matchs.")
         }
-        console.log("Matchs supprimés avec succès.")
-        // Supprimer toutes les liaisons adherent_reservation où il est PARTICIPANT
+        // Supprimer toutes les Foreign Key : adherent_reservation 
         const deleteARByAdherentSql = `
         DELETE FROM adherent_reservation
         WHERE id_adherent = ?
       `;
+
         db.query(deleteARByAdherentSql, [id], (err) => {
             if (err) {
-                console.log(err);
                 return res.status(500).send("Erreur lors de la suppression des réservations d'adhérent.")
             }
-            console.log("Liaisons adherent_reservation supprimées avec succès.")
-            // Supprimer les liaisons adherent_reservation des réservations qu'il possède
+            // Supprimer les Foreign Key d'adherent_reservation
             const deleteARByReservationSql = `
-          DELETE FROM adherent_reservation
-          WHERE id_reservation IN (
-            SELECT id_reservation FROM reservation WHERE id_adherent = ?
-          )
-        `;
+                    DELETE FROM adherent_reservation
+                    WHERE id_reservation IN (
+                    SELECT id_reservation FROM reservation WHERE id_adherent = ?
+                    )
+                `;
+
             db.query(deleteARByReservationSql, [id], (err) => {
                 if (err) {
-                    console.log(err);
                     return res.status(500).send("Erreur lors de la suppression des réservations.")
                 }
-                console.log("Liaisons adherent_reservation supprimées avec succès.")
                 // Supprimer ses réservations
                 const deleteReservationSql = "DELETE FROM reservation WHERE id_adherent = ?";
                 db.query(deleteReservationSql, [id], (err) => {
                     if (err) {
-                        console.log(err);
                         return res.status(500).send("Erreur lors de la suppression des réservations principales.")
                     }
-                    console.log("Réservations supprimées avec succès.")
                     // Supprimer les licences
                     const deleteLicencesSql = "DELETE FROM licence WHERE id_adherent = ?";
                     db.query(deleteLicencesSql, [id], (err) => {
                         if (err) {
-                            console.log(err);
                             return res.status(500).send("Erreur lors de la suppression des licences.")
                         }
-                        console.log("Licences supprimées avec succès.")
-                        // Supprimer les commentaires
                         
                             // Supprimer l'adhérent
                             const deleteSql = "DELETE FROM adherent WHERE id_adherent = ?";
                             db.query(deleteSql, [id], (err, results) => {
                                 if (err) {
-                                    console.log(err);
                                     return res.status(500).send("Erreur lors de la suppression du compte.")
                                 }
-                                console.log("Adhérent supprimé avec succès.")
                                 res.clearCookie("token", {
                                     httpOnly: true,
                                     secure: false
@@ -316,6 +303,8 @@ export const deleteUser = (req, res) => {
 
 // ----- GET GLOBAL STATISTICS ----- //
 export const getGlobalStats = (req, res) => {
+
+    // Récupère les données liée à un match,licence de tous les adherents, le total des clubs...
     const sql = `
         SELECT 
             COUNT(DISTINCT m.id_match) AS nombre_total_matchs,

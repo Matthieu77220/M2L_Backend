@@ -5,7 +5,7 @@ import 'dotenv/config'
 export const voirTerrain = (req, res) => {
     const id = req.user.id
 
-    
+    // -- Vérifie que l'adherent existe    
     const checkUserSql = `SELECT id_club, role FROM adherent WHERE id_adherent = ?`
 
     db.query(checkUserSql, id, (err, userResult) => {
@@ -19,7 +19,7 @@ export const voirTerrain = (req, res) => {
 
         const user = userResult[0]
         
-        // Si l'utilisateur a un club (admin), affiche seulement les terrains de son club
+        // Si l'utilisateur est dans un club (admin), affiche seulement les terrains de son club
         // Sinon (adhérent standard), affiche tous les terrains
         const sql = user.id_club 
             ? `SELECT * FROM terrain WHERE id_club = ? ORDER BY id_terrain ASC`

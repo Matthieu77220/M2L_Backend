@@ -1,6 +1,6 @@
 import db from "../config/db.js"
 
-// ----- LICENCE ----- //
+// ----- Rejoindre un Match à partir du code ----- //
 export const rejoindreMatch = (req, res) => {
 
     const {numero_reservation} = req.body
@@ -36,7 +36,7 @@ export const rejoindreMatch = (req, res) => {
         // récupère l'id de la réservation
         const id_reservation = result[0]["id_reservation"]
 
-            // L'utilisateur n'est pas inscrit dans la réservation
+        // L'utilisateur n'est pas inscrit dans la réservation
         db.query(sql2, [id_reservation, id], (err, result2) => {
 
             if (err) {

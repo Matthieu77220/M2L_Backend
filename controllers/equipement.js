@@ -6,6 +6,7 @@ export const stockChasuble = (req, res) => {
     // --- Récupération de l'id du club depuis le middleware ---
     const id = req.user.id
 
+    // Récupère les chasubles d'un club
     const sql = `
                 SELECT * FROM equipements 
                   WHERE id_club = (SELECT id_club 
@@ -31,6 +32,7 @@ export const stockCrampon = (req, res) => {
     // --- Récupération de l'id du club depuis le middleware ---
     const id = req.user.id
 
+    // Récupère les crampons d'un club
     const sql = `
                 SELECT * FROM equipements 
                   WHERE id_club = (SELECT id_club 
@@ -58,6 +60,7 @@ export const stockBallon = (req, res) => {
     // --- Récupération de l'id du club depuis le middleware ---
     const id = req.user.id
 
+    // Récupère les ballons d'un club
     const sql = `
                 SELECT * FROM equipements 
                   WHERE id_club = (SELECT id_club 

@@ -1,7 +1,7 @@
 import db from "../config/db.js"
 import 'dotenv/config'
 
-// ----- LICENCE ----- //
+// ----- Visualisation de la LICENCE ----- //
 export const identifiantLicence = (req, res) => {
 
     // --- Récupération de l'id de l'adherent depuis le middleware ---

@@ -1,12 +1,13 @@
 import db from "../config/db.js"
 import 'dotenv/config'
 
-// ----- Statistique ----- //
+// ----- Visualiser les Statistique de l'adherent ----- //
 export const statistique = (req, res) => {
 
     // --- Récupération de l'id de l'adherent depuis le middleware ---
     const id = req.user.id
 
+    // Récupère le nombre de match, le totla des victoires, les défaites, égalités
     const sql =  `SELECT COUNT(m.id_match) AS nombreMatch , SUM(m.nb_victoires) AS victoire , SUM(m.nb_defaites) AS defaite , SUM(m.nb_egalites) AS egalite
                   FROM matchs as m
                   JOIN reservation r on r.id_reservation = m.id_reservation
@@ -32,7 +33,7 @@ export const visualisationMatch = (req, res) => {
     // --- Récupération de l'id de l'adherent depuis le middleware ---
     const id = req.user.id
 
-    // A FAIRE !!!!  apres les AS rennomer selon le map dans le front
+    // Récupère la date de réservation, le score et le status du match
     const sql = `SELECT r.date_reservation, m.score, m.status
                  FROM reservation r
                  JOIN matchs m on m.id_reservation = r.id_reservation

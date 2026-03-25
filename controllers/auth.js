@@ -47,14 +47,15 @@ export const inscription = (req, res) => {
                         res.status(500).send("Erreur lors de l'ajout de l'adherent dans la Base De Données")
                     }
 
-                    // Ajout du numero de l'adherent dans la table licence
+                    // Ajout du numero de l'adherent dans la table licence générer aléatoirement
                     let numero_adherent = "LIC";
 
                     for (let index = 0; index < 5; index++) { // Boucle 5 fois
                         const nombre_aleatoire = Math.floor(Math.random() * 10); // Donne un nombre aléatoire compris entre 0 et 9 inclus
                         numero_adherent += nombre_aleatoire.toString();
                     }
-
+                    
+                    // -- Insert dans la table licence les données de l'utlisateur
                     const sqlLicence = `INSERT INTO licence (numero_adherent, debut_licence, fin_licence, id_adherent)
                                         VALUES (?, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 1 YEAR), ?);
                                         `
@@ -172,8 +173,6 @@ export const deconnexion = (req, res) => {
 }
 
 // ----- SUPPRESSION ----- //
-
-
 export const suppressionCompte = (req, res) => {
 
     // --- Récupération de l'id de l'adherent depuis le middleware ---
