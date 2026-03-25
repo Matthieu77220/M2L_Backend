@@ -26,7 +26,7 @@ export const voirTerrain = (req, res) => {
 
     const { nom } = req.body
 
-    const sql = `SELECT terrain.adresse, club.nom
+    const sql = `SELECT terrain.id_terrain, terrain.adresse, club.nom
                  from terrain
                  join club on club.id_club = terrain.id_club
                  where club.nom = ? ;

@@ -16,6 +16,7 @@ import equipementRoutes from "./routes/equipement.js";
 import abonnementRoutes from "./routes/abonnements.js";
 import rejoindreMatchRoutes from "./routes/rejoindreMatch.js";
 import voirClubRoutes from "./routes/voirClub.js"
+import reservationRoutes from "./routes/reservation.js";
 
 
 const app = express();
@@ -28,13 +29,20 @@ const corsOptions = {
     // autorise les requêtes sans origin
     if (!origin) return callback(null, true);
 
-    if (origin.startsWith('http://localhost')) {
+    const allowedOriginRegexes = [
+      /^http:\/\/localhost(?::\d+)?$/,
+      /^http:\/\/127\.0\.0\.1(?::\d+)?$/,
+    ];
+
+    if (allowedOriginRegexes.some((re) => re.test(origin))) {
       return callback(null, true);
     }
 
-    return callback(new Error('Not allowed by CORS'));
+    return callback(new Error("Not allowed by CORS"));
   },
   credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization"],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 };
 
 app.use(cors(corsOptions));
@@ -56,6 +64,7 @@ app.use("/api/abonnements", abonnementRoutes);
 app.use("/api/terrain", terrainAdherentRoutes);
 app.use("/api/rejoindreMatch", rejoindreMatchRoutes);
 app.use("/api/club", voirClubRoutes);
+app.use("/api/reservation", reservationRoutes);
 
 app.get("/", (req, res) => {
   res.json("hello World");

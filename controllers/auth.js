@@ -118,7 +118,11 @@ export const connexion = (req, res) => {
     db.query(sql, [email], (err, results) => {
 
         if (err) {
-            return res.status(500).send("Erreur lors de la recherche de l'adherent !");
+            console.error("Erreur SQL (connexion):", err);
+            return res.status(500).json({
+                message: "Erreur lors de la recherche de l'adherent !",
+                error: err.message,
+            });
         }
 
         if (results.length === 0) {
@@ -278,7 +282,11 @@ export const modifierMotDePasse = (req, res) => {
 
     db.query(sql, [email], (err, results) => {
         if (err) {
-            return res.status(500).send("Erreur lors de la recherche de l'adherent !");
+            console.error("Erreur SQL (modifierMotDePasse):", err);
+            return res.status(500).json({
+                message: "Erreur lors de la recherche de l'adherent !",
+                error: err.message,
+            });
         }
 
         if (results.length === 0) {
