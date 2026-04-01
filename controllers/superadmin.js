@@ -6,20 +6,24 @@ export const getDashboardStats = (req, res) => {
     
     // -- Récupération des totaux des adherents,clubs,licences,reservation,maths --
     const sql = `
-        SELECT 
-            (SELECT COUNT(*) FROM adherent) AS total_users,
-            (SELECT COUNT(*) FROM club) AS total_clubs,
-            (SELECT COUNT(*) FROM licence WHERE fin_licence IS NULL OR fin_licence >= CURDATE()) AS active_licenses,
-            (SELECT COUNT(*) FROM licence) AS total_licenses,
-            (SELECT COUNT(*) FROM reservation) AS total_reservations,
-            (SELECT COUNT(*) FROM matchs) AS total_matches
+            SELECT 
+                (SELECT COUNT(*) FROM adherent) AS total_users,
+                (SELECT COUNT(*) FROM adherent where adherent.role = "admin") AS total_admin,
+                (SELECT COUNT(*) FROM adherent where adherent.role = "superAdmin") AS total_super_admin,
+                (SELECT COUNT(*) FROM club) AS total_club,
+                (SELECT COUNT(*) FROM licence WHERE fin_licence IS NULL OR fin_licence >= CURDATE()) AS licence_non_valides,
+                (SELECT COUNT(*) FROM licence WHERE fin_licence <= CURDATE()) AS licence_valides,
+                (SELECT COUNT(*) FROM licence) AS total_licenses,
+                (SELECT COUNT(*) FROM reservation) AS total_reservations,
+                (SELECT COUNT(*) FROM matchs) AS total_matches;
     `
     
     db.query(sql, (err, results) => {
         if (err) {
             return res.status(500).json({ error: "Erreur lors de la récupération des statistiques du dashboard" })
-        }
+        }        
         return res.json(results[0])
+        
     })
 }
 
