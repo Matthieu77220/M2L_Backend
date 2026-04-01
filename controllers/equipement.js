@@ -25,8 +25,13 @@ export const stockChasuble = (req, res) => {
         const id_club = results[0].id_club
 
         db.query(sql, id_club, (err, results) => {
-            if (err) return res.status(500).send("Erreur lors de l'exécution de la requete SQL.")
-            return res.json(results)
+            if (err) {
+                return res.status(500).send("Erreur lors de l'exécution de la requete SQL.")
+            }
+
+            if (results) {
+                return res.json(results)
+            }
         })
     })
 }
@@ -51,12 +56,16 @@ export const stockCrampon = (req, res) => {
     `
 
     db.query(sqlClub, id_adherent, (err, results) => {
-        if (err) return res.status(500).send("Erreur lors de l'exécution de la requete SQL.")
+        if (err) {
+            return res.status(500).send("Erreur lors de l'exécution de la requete SQL.")
+        }
 
         const id_club = results[0].id_club
 
         db.query(sql, id_club, (err, results) => {
-            if (err) return res.status(500).send("Erreur lors de l'exécution de la requete SQL.")
+            if (err) {
+                return res.status(500).send("Erreur lors de l'exécution de la requete SQL.")
+            }
             return res.json(results)
         })
     })
@@ -84,12 +93,16 @@ export const stockBallon = (req, res) => {
     `
 
     db.query(sqlClub, id_adherent, (err, results) => {
-        if (err) return res.status(500).send("Erreur lors de l'exécution de la requete SQL.")
+        if (err) {
+            return res.status(500).send("Erreur lors de l'exécution de la requete SQL.")
+        }
 
         const id_club = results[0].id_club
 
         db.query(sql, id_club, (err, results) => {
-            if (err) return res.status(500).send("Erreur lors de l'exécution de la requete SQL.")
+            if (err) {
+                return res.status(500).send("Erreur lors de l'exécution de la requete SQL.")
+            }
             return res.json(results)
         })
     })
