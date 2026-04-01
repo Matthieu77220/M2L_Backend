@@ -18,10 +18,10 @@ export const voirTerrain = (req, res) => {
         }
 
         const user = userResult[0]
-        
+
         // Si l'utilisateur est dans un club (admin), affiche seulement les terrains de son club
         // Sinon (adhérent standard), affiche tous les terrains
-        const sql = user.id_club 
+        const sql = user.id_club
             ? `SELECT * FROM terrain WHERE id_club = ? ORDER BY id_terrain ASC`
             : `SELECT * FROM terrain ORDER BY id_terrain ASC`
 
@@ -65,15 +65,32 @@ export const ajouterTerrain = (req, res) => {
                   )
                   ORDER BY id_terrain ASC ; `
 
+    // -- Insertion des equipement par défaut 0
+    const sqlEquipement = ` INSERT INTO equipements (equipement, stock_base, stock_current, id_terrain)
+                            VALUES
+                            ('chasuble', 100, 0, ?),
+                            ('crampon', 100, 0, ?),
+                            ('ballon', 20, 0, ?); `
+
+
     db.query(id_club, id, (err, result) => {
         // -- Vérifie que l'admin est associé a id_club
         if (result.length == 1) {
             db.query(sql, [adresse, result[0].id_club], (err, result) => { // result[0].id_club = id_club
+
+                const idTerrain = result.insertId;
+
+
                 if (err) {
                     return res.status(500).send("Erreur lors de l'éxecution de la requêtes SQl.")
                 }
 
-                if (result) {
+                db.query(sqlEquipement, [idTerrain, idTerrain, idTerrain], (err, result) => {
+                    if (err) {
+                        return res.status(500).send("Erreur lors de l'éxecution de la requêtes SQl.")
+                    }
+
+                                    if (result) {
                     db.query(sqlRelaodPage, id, (err, result) => {
                         if (err) {
                             return res.status(500).send("Erreur lors de l'éxecution de la requêtes Sql")
@@ -82,8 +99,11 @@ export const ajouterTerrain = (req, res) => {
                         }
                     })
                 }
+
+                })
+
             })
-        }else {
+        } else {
             return res.status(500).send("Le compte n'appartient pas à un club.")
         }
     })
