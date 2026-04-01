@@ -16,6 +16,7 @@ import equipementRoutes from "./routes/equipement.js";
 import abonnementRoutes from "./routes/abonnements.js";
 import rejoindreMatchRoutes from "./routes/rejoindreMatch.js";
 import voirClubRoutes from "./routes/voirClub.js"
+import superAdminEquipement from "./routes/superAdminEquipement.js"
 
 
 const app = express();
@@ -56,6 +57,7 @@ app.use("/api/abonnements", abonnementRoutes);
 app.use("/api/terrain", terrainAdherentRoutes);
 app.use("/api/rejoindreMatch", rejoindreMatchRoutes);
 app.use("/api/club", voirClubRoutes);
+app.use("/api/superAdminEquipement", superAdminEquipement);
 
 app.get("/", (req, res) => {
   res.json("hello World");
