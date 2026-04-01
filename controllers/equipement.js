@@ -8,12 +8,11 @@ export const stockChasuble = (req, res) => {
 
     // Récupère les chasubles d'un club
     const sql = `
-                SELECT * FROM equipements 
-                  WHERE id_club = (SELECT id_club 
-                                                from adherent 
-                                                WHERE id_adherent = ?) 
-                    AND 
-                        equipement = "chasuble";
+                SELECT equipements.equipement, equipements.stock_base, equipements.stock_current, terrain.adresse
+                FROM terrain
+                LEFT JOIN equipements 
+                    ON equipements.id_terrain = terrain.id_terrain
+                WHERE terrain.id_club = ? AND equipements.equipement = 'chasuble';
                 `
 
     db.query(sql, id, (err, results) => {
@@ -34,12 +33,11 @@ export const stockCrampon = (req, res) => {
 
     // Récupère les crampons d'un club
     const sql = `
-                SELECT * FROM equipements 
-                  WHERE id_club = (SELECT id_club 
-                                                from adherent 
-                                                WHERE id_adherent = ?) 
-                    AND 
-                        equipement = "crampon";
+                SELECT equipements.equipement, equipements.stock_base, equipements.stock_current, terrain.adresse
+                FROM terrain
+                LEFT JOIN equipements 
+                    ON equipements.id_terrain = terrain.id_terrain
+                WHERE terrain.id_club = ? AND equipements.equipement = 'crampon';
                 `
 
     db.query(sql, id, (err, results) => {
@@ -62,19 +60,18 @@ export const stockBallon = (req, res) => {
 
     // Récupère les ballons d'un club
     const sql = `
-                SELECT * FROM equipements 
-                  WHERE id_club = (SELECT id_club 
-                                                from adherent 
-                                                WHERE id_adherent = ?) 
-                    AND 
-                        equipement = "ballon";
+                SELECT equipements.equipement, equipements.stock_base, equipements.stock_current, terrain.adresse
+                FROM terrain
+                LEFT JOIN equipements 
+                    ON equipements.id_terrain = terrain.id_terrain
+                WHERE terrain.id_club = ? AND equipements.equipement = 'ballon';
                 `
     
 
     db.query(sql, id, (err, results) => {
         if (err) {
             return res.status(500).send("Erreur lors de l'exécution de la requete SQL.")
-        }else {
+        }else {            
             return res.json(results)
             
         }
