@@ -368,7 +368,7 @@ export const deleteUser = (req, res) => {
                         const deleteLicencesSql = "DELETE FROM licence WHERE id_adherent = ?";
                         db.query(deleteLicencesSql, [id], (err) => {
                             if (err) return res.status(500).json({ message: "Erreur serveur (licence)" });
-                            
+
                             //supprimer l’adhérent
                             const deleteSql = "DELETE FROM ADHERENT WHERE id_adherent = ?";
                             db.query(deleteSql, [id], (err, result) => {
@@ -390,26 +390,52 @@ export const deleteUser = (req, res) => {
 
 // ----- STATISTICS ----- //
 export const getStats = (req, res) => {
-    const sql = `
-            SELECT 
-                (SELECT COUNT(*) FROM adherent) AS total_users,
-                (SELECT COUNT(*) FROM club) AS total_clubs,
-                (SELECT COUNT(*) FROM licence WHERE fin_licence IS NULL OR fin_licence >= CURDATE()) AS active_licenses,
-                (SELECT COUNT(*) FROM licence) AS total_licenses,
-                (SELECT COUNT(*) FROM reservation) AS total_reservations,
-                (SELECT COUNT(*) FROM matchs) AS total_matches
-        `
 
-    db.query(sql, (err, result) => {
+    const id_adherent = req.user.id
+
+    // Récupérer le club de l'utilisateur
+    const sqlClub = `
+        SELECT id_club 
+        FROM adherent 
+        WHERE id_adherent = ?
+    `;
+
+    // Requête principale
+    const sqlStats = `
+        SELECT 
+            (SELECT COUNT(*) FROM adherent) AS total_users,
+            (SELECT COUNT(*) FROM adherent WHERE role = "admin") AS total_admin,
+            (SELECT COUNT(*) FROM licence WHERE fin_licence IS NULL OR fin_licence >= CURDATE()) AS licence_non_valides,
+            (SELECT COUNT(*) FROM licence WHERE fin_licence <= CURDATE()) AS licence_valides,
+            (SELECT COUNT(*) FROM licence) AS total_licenses,
+            (SELECT COUNT(*)
+             FROM reservation r
+             JOIN adherent a ON a.id_adherent = r.id_adherent
+             WHERE a.id_club = ?) AS total_matches;
+    `;
+
+    db.query(sqlClub, [id_adherent], (err, resultClub) => {
         if (err) {
-            res.status(500).json({ error: "Erreur lors de la récupération des statistiques" })
+            return res.status(500).send("Erreur lors de la récupération du club.");
         }
 
-        if (result.length == 0) {
-            res.status(500).json({ error: "Aucune statistique" })
-        } else {
-            res.status(200).send(result[0])
+        if (resultClub.length === 0) {
+            return res.status(404).send("Utilisateur non trouvé.");
         }
 
-    })
-}
+        const id_club = resultClub[0].id_club;
+
+        db.query(sqlStats, [id_club], (err, resultStats) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ error: "Erreur lors de la récupération des statistiques" });
+            }
+
+            if (!resultStats || resultStats.length === 0) {
+                return res.status(404).json({ error: "Aucune statistique disponible" });
+            }
+
+            return res.status(200).json(resultStats[0]);
+        });
+    });
+};
