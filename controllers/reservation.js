@@ -6,6 +6,49 @@ const generateReservationNumber = () => {
     return Math.floor(100000 + Math.random() * 900000); // Nombre compris entre 100.000 et 900.000
 }
 
+// ----- Liste des réservations de l'adhérent connecté (créateur ou participant) ----- //
+export const mesReservations = (req, res) => {
+    const id_adherent = req.user.id
+
+    const sql = `
+        SELECT
+            r.numero_reservation,
+            c.nom AS club,
+            t.adresse AS terrain,
+            DATE_FORMAT(r.date_reservation, '%Y-%m-%d') AS date,
+            DATE_FORMAT(r.heure_debut, '%H:%i') AS heureDebut,
+            DATE_FORMAT(r.heure_fin, '%H:%i') AS heureFin,
+            IFNULL((
+                SELECT m2.status FROM matchs m2
+                WHERE m2.id_reservation = r.id_reservation
+                ORDER BY m2.id_match DESC
+                LIMIT 1
+            ), 'prevu') AS statut
+        FROM reservation r
+        INNER JOIN adherent_reservation ar
+            ON ar.id_reservation = r.id_reservation AND ar.id_adherent = ?
+        INNER JOIN terrain t ON t.id_terrain = r.id_terrain
+        INNER JOIN club c ON c.id_club = t.id_club
+        ORDER BY r.date_reservation DESC, r.heure_debut DESC
+    `
+
+    db.query(sql, [id_adherent], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ message: "Erreur lors de la récupération des réservations" })
+        }
+        const payload = rows.map((row) => ({
+            numero_reservation: row.numero_reservation,
+            club: row.club,
+            terrain: row.terrain,
+            date: row.date,
+            heureDebut: row.heureDebut ?? row.heuredebut,
+            heureFin: row.heureFin ?? row.heurefin,
+            statut: row.statut ?? "prevu",
+        }))
+        return res.json(payload)
+    })
+}
+
 // ----- Créer une réservation ----- //
 export const creerReservation = (req, res) => {
     const { id_terrain, date_reservation, heure_debut, duree_minutes } = req.body;
