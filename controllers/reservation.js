@@ -19,6 +19,18 @@ export const mesReservations = (req, res) => {
             DATE_FORMAT(r.heure_debut, '%H:%i') AS heureDebut,
             DATE_FORMAT(r.heure_fin, '%H:%i') AS heureFin,
             IFNULL((
+                SELECT m2.score FROM matchs m2
+                WHERE m2.id_reservation = r.id_reservation
+                ORDER BY m2.id_match DESC
+                LIMIT 1
+            ), '-') AS score,
+            IFNULL((
+                SELECT m2.nb_buts FROM matchs m2
+                WHERE m2.id_reservation = r.id_reservation
+                ORDER BY m2.id_match DESC
+                LIMIT 1
+            ), 0) AS nbButs,
+            IFNULL((
                 SELECT m2.status FROM matchs m2
                 WHERE m2.id_reservation = r.id_reservation
                 ORDER BY m2.id_match DESC
@@ -43,9 +55,77 @@ export const mesReservations = (req, res) => {
             date: row.date,
             heureDebut: row.heureDebut ?? row.heuredebut,
             heureFin: row.heureFin ?? row.heurefin,
+            score: row.score ?? "-",
+            nbButs: row.nbButs ?? row.nbbuts ?? 0,
             statut: row.statut ?? "prevu",
         }))
         return res.json(payload)
+    })
+}
+
+export const mettreScore = (req, res) => {
+    const idAdherent = req.user.id
+    const { numero_reservation, score, nb_buts } = req.body
+
+    if (!numero_reservation || !score || nb_buts === undefined) {
+        return res.status(400).json({ message: "numero_reservation, score et nb_buts sont obligatoires" })
+    }
+
+    const nbButs = Number(nb_buts)
+    if (Number.isNaN(nbButs) || nbButs < 0) {
+        return res.status(400).json({ message: "nb_buts doit etre un nombre positif" })
+    }
+
+    const reservationSql = `
+        SELECT r.id_reservation
+        FROM reservation r
+        INNER JOIN adherent_reservation ar ON ar.id_reservation = r.id_reservation
+        WHERE r.numero_reservation = ? AND ar.id_adherent = ?
+        LIMIT 1
+    `
+
+    db.query(reservationSql, [numero_reservation, idAdherent], (reservationErr, reservationRows) => {
+        if (reservationErr) {
+            return res.status(500).json({ message: "Erreur lors de la verification de la reservation" })
+        }
+
+        if (reservationRows.length === 0) {
+            return res.status(404).json({ message: "Reservation introuvable pour cet adherent" })
+        }
+
+        const idReservation = reservationRows[0].id_reservation
+
+        const existingMatchSql = "SELECT id_match FROM matchs WHERE id_reservation = ? LIMIT 1"
+        db.query(existingMatchSql, [idReservation], (matchErr, matchRows) => {
+            if (matchErr) {
+                return res.status(500).json({ message: "Erreur lors de la verification du match" })
+            }
+
+            if (matchRows.length > 0) {
+                const updateSql = `
+                    UPDATE matchs
+                    SET score = ?, nb_buts = ?, status = 'termine'
+                    WHERE id_match = ?
+                `
+                return db.query(updateSql, [score, nbButs, matchRows[0].id_match], (updateErr) => {
+                    if (updateErr) {
+                        return res.status(500).json({ message: "Erreur lors de la mise a jour du score" })
+                    }
+                    return res.json({ success: true, message: "Score mis a jour" })
+                })
+            }
+
+            const insertSql = `
+                INSERT INTO matchs (id_reservation, score, status, nb_buts, nb_victoires, nb_egalites, nb_defaites)
+                VALUES (?, ?, 'termine', ?, 0, 0, 0)
+            `
+            return db.query(insertSql, [idReservation, score, nbButs], (insertErr) => {
+                if (insertErr) {
+                    return res.status(500).json({ message: "Erreur lors de l'enregistrement du score" })
+                }
+                return res.json({ success: true, message: "Score enregistre" })
+            })
+        })
     })
 }
 
