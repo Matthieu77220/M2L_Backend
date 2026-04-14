@@ -23,7 +23,13 @@ export const mesReservations = (req, res) => {
                 WHERE m2.id_reservation = r.id_reservation
                 ORDER BY m2.id_match DESC
                 LIMIT 1
-            ), 'prevu') AS statut
+            ), 'prevu') AS statut,
+            (
+                SELECT m3.id_match FROM matchs m3
+                WHERE m3.id_reservation = r.id_reservation
+                ORDER BY m3.id_match DESC
+                LIMIT 1
+            ) AS id_match
         FROM reservation r
         INNER JOIN adherent_reservation ar
             ON ar.id_reservation = r.id_reservation AND ar.id_adherent = ?
@@ -44,6 +50,7 @@ export const mesReservations = (req, res) => {
             heureDebut: row.heureDebut ?? row.heuredebut,
             heureFin: row.heureFin ?? row.heurefin,
             statut: row.statut ?? "prevu",
+            id_match: row.id_match ?? null,
         }))
         return res.json(payload)
     })
@@ -103,41 +110,94 @@ export const creerReservation = (req, res) => {
                 // Générer le numéro de réservation
                 const numero_reservation = generateReservationNumber();
 
-                // Créer la réservation
+                // Créer la réservation, son match associé et le lien adhérent dans une transaction
                 const createReservationSql = `
                     INSERT INTO reservation (id_adherent, id_terrain, date_reservation, heure_debut, heure_fin, numero_reservation)
                     VALUES (?, ?, ?, ?, ?, ?)
                 `;
 
-                db.query(createReservationSql, [id_adherent, id_terrain, date_reservation, heure_debut, heure_fin, numero_reservation], (err, result) => {
+                const createMatchSql = `
+                    INSERT INTO matchs (id_reservation, score, status, nb_buts, nb_victoires, nb_egalites, nb_defaites)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                `;
+
+                const addAdherentReservationSql = `
+                    INSERT INTO adherent_reservation (id_adherent, id_reservation)
+                    VALUES (?, ?)
+                `;
+
+                db.getConnection((err, connection) => {
                     if (err) {
-                        return res.status(500).json({ message: "Erreur lors de la création de la réservation" });
+                        return res.status(500).json({ message: "Erreur lors de la connexion à la base de données" });
                     }
 
-                    const id_reservation = result.insertId;
-
-                    // Ajouter l'utilisateur à la table adherent_reservation
-                    const addAdherentReservationSql = `
-                        INSERT INTO adherent_reservation (id_adherent, id_reservation)
-                        VALUES (?, ?)
-                    `;
-
-                    db.query(addAdherentReservationSql, [id_adherent, id_reservation], (err) => {
+                    connection.beginTransaction((err) => {
                         if (err) {
-                            return res.status(500).json({ message: "Erreur lors de l'ajout à la réservation" });
+                            connection.release();
+                            return res.status(500).json({ message: "Erreur lors de l'initialisation de la transaction" });
                         }
 
-                        return res.json({
-                            success: true,
-                            message: "Réservation créée avec succès",
-                            numero_reservation: numero_reservation,
-                            id_reservation: id_reservation
-                        });
+                        connection.query(
+                            createReservationSql,
+                            [id_adherent, id_terrain, date_reservation, heure_debut, heure_fin, numero_reservation],
+                            (err, result) => {
+                                if (err) {
+                                    return connection.rollback(() => {
+                                        connection.release();
+                                        return res.status(500).json({ message: "Erreur lors de la création de la réservation" });
+                                    });
+                                }
+
+                                const id_reservation = result.insertId;
+
+                                connection.query(
+                                    createMatchSql,
+                                    [id_reservation, "0-0", "prevu", 0, 0, 0, 0],
+                                    (err, matchResult) => {
+                                        if (err) {
+                                            return connection.rollback(() => {
+                                                connection.release();
+                                                return res.status(500).json({ message: "Erreur lors de la création du match associé" });
+                                            });
+                                        }
+
+                                        connection.query(
+                                            addAdherentReservationSql,
+                                            [id_adherent, id_reservation],
+                                            (err) => {
+                                                if (err) {
+                                                    return connection.rollback(() => {
+                                                        connection.release();
+                                                        return res.status(500).json({ message: "Erreur lors de l'ajout à la réservation" });
+                                                    });
+                                                }
+
+                                                connection.commit((err) => {
+                                                    if (err) {
+                                                        return connection.rollback(() => {
+                                                            connection.release();
+                                                            return res.status(500).json({ message: "Erreur lors de la validation de la réservation" });
+                                                        });
+                                                    }
+
+                                                    connection.release();
+                                                    return res.json({
+                                                        success: true,
+                                                        message: "Réservation créée avec succès",
+                                                        numero_reservation: numero_reservation,
+                                                        id_reservation: id_reservation,
+                                                        id_match: matchResult.insertId
+                                                    });
+                                                });
+                                            }
+                                        );
+                                    }
+                                );
+                            }
+                        );
                     });
                 });
             });
         });
     });
 };
-
-
