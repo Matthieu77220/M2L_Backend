@@ -136,6 +136,49 @@ export const mettreScore = (req, res) => {
     })
 }
 
+
+
+
+// ----- Créneaux réservés d'un terrain (futurs) ----- //
+export const creneauxTerrain = (req, res) => {
+    const idTerrain = Number(req.params.id_terrain)
+
+    if (Number.isNaN(idTerrain) || idTerrain <= 0) {
+        return res.status(400).json({ message: "id_terrain invalide" })
+    }
+
+    const sql = `
+        SELECT
+            DATE_FORMAT(r.date_reservation, '%Y-%m-%d') AS date_reservation,
+            DATE_FORMAT(r.heure_debut, '%H:%i') AS heure_debut,
+            DATE_FORMAT(r.heure_fin, '%H:%i') AS heure_fin,
+            c.nom AS club,
+            t.adresse AS terrain
+        FROM reservation r
+        INNER JOIN terrain t ON t.id_terrain = r.id_terrain
+        INNER JOIN club c ON c.id_club = t.id_club
+        WHERE r.id_terrain = ?
+          AND r.date_reservation >= CURDATE()
+        ORDER BY r.date_reservation ASC, r.heure_debut ASC
+    `
+
+    db.query(sql, [idTerrain], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ message: "Erreur lors de la récupération des créneaux" })
+        }
+
+        return res.json(
+            rows.map((row) => ({
+                date_reservation: row.date_reservation,
+                heure_debut: row.heure_debut,
+                heure_fin: row.heure_fin,
+                club: row.club,
+                terrain: row.terrain,
+            }))
+        )
+    })
+}
+
 // ----- Créer une réservation ----- //
 export const creerReservation = (req, res) => {
     const { id_terrain, date_reservation, heure_debut, duree_minutes } = req.body;
