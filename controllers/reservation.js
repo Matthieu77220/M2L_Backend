@@ -187,40 +187,52 @@ export const creerReservation = (req, res) => {
                     return res.status(409).json({ message: "Ce créneau n'est pas disponible" });
                 }
 
-                // Générer le numéro de réservation
+                const id_club = terrainResult[0].id_club;
                 const numero_reservation = generateReservationNumber();
-
-                // Créer la réservation, son match associé et le lien adhérent dans une transaction
-                const createReservationSql = `
-                    INSERT INTO reservation (id_adherent, id_terrain, date_reservation, heure_debut, heure_fin, numero_reservation)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                `;
-
-                const createMatchSql = `
-                    INSERT INTO matchs (id_reservation, score, status, nb_buts, nb_victoires, nb_egalites, nb_defaites)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                `;
-
-                const addAdherentReservationSql = `
-                    INSERT INTO adherent_reservation (id_adherent, id_reservation)
-                    VALUES (?, ?)
-                `;
 
                 db.getConnection((err, connection) => {
                     if (err) {
-                        return res.status(500).json({ message: "Erreur lors de la connexion à la base de données" });
+                        return res.status(500).json({ message: "Erreur de connexion à la base de données" });
                     }
 
                     connection.beginTransaction((err) => {
                         if (err) {
                             connection.release();
-                            return res.status(500).json({ message: "Erreur lors de l'initialisation de la transaction" });
+                            return res.status(500).json({ message: "Erreur lors du démarrage de la transaction" });
                         }
 
-                        connection.query(
-                            createReservationSql,
-                            [id_adherent, id_terrain, date_reservation, heure_debut, heure_fin, numero_reservation],
-                            (err, result) => {
+                        const checkStocksSql = `
+                            SELECT 
+                                COUNT(*) AS total_equipements,
+                                SUM(CASE WHEN stock_current > 0 THEN 1 ELSE 0 END) AS equipements_disponibles
+                            FROM equipements
+                            WHERE id_club = ? AND id_terrain = ?
+                        `;
+
+                        connection.query(checkStocksSql, [id_club, id_terrain], (err, stockResult) => {
+                            if (err) {
+                                return connection.rollback(() => {
+                                    connection.release();
+                                    return res.status(500).json({ message: "Erreur lors de la vérification du stock des équipements" });
+                                });
+                            }
+
+                            const totalEquipements = stockResult[0]?.total_equipements ?? 0;
+                            const equipementsDisponibles = stockResult[0]?.equipements_disponibles ?? 0;
+
+                            if (totalEquipements > 0 && equipementsDisponibles < totalEquipements) {
+                                return connection.rollback(() => {
+                                    connection.release();
+                                    return res.status(409).json({ message: "Stock insuffisant sur un ou plusieurs équipements du terrain" });
+                                });
+                            }
+
+                            const createReservationSql = `
+                                INSERT INTO reservation (id_adherent, id_terrain, date_reservation, heure_debut, heure_fin, numero_reservation)
+                                VALUES (?, ?, ?, ?, ?, ?)
+                            `;
+
+                            connection.query(createReservationSql, [id_adherent, id_terrain, date_reservation, heure_debut, heure_fin, numero_reservation], (err, result) => {
                                 if (err) {
                                     return connection.rollback(() => {
                                         connection.release();
@@ -229,55 +241,58 @@ export const creerReservation = (req, res) => {
                                 }
 
                                 const id_reservation = result.insertId;
+                                const addAdherentReservationSql = `
+                                    INSERT INTO adherent_reservation (id_adherent, id_reservation)
+                                    VALUES (?, ?)
+                                `;
 
-                                connection.query(
-                                    createMatchSql,
-                                    [id_reservation, "0-0", "prevu", 0, 0, 0, 0],
-                                    (err, matchResult) => {
+                                connection.query(addAdherentReservationSql, [id_adherent, id_reservation], (err) => {
+                                    if (err) {
+                                        return connection.rollback(() => {
+                                            connection.release();
+                                            return res.status(500).json({ message: "Erreur lors de l'ajout à la réservation" });
+                                        });
+                                    }
+
+                                    const decrementEquipementsSql = `
+                                        UPDATE equipements
+                                        SET stock_current = stock_current - 1
+                                        WHERE id_club = ? AND id_terrain = ?
+                                    `;
+
+                                    connection.query(decrementEquipementsSql, [id_club, id_terrain], (err) => {
                                         if (err) {
                                             return connection.rollback(() => {
                                                 connection.release();
-                                                return res.status(500).json({ message: "Erreur lors de la création du match associé" });
+                                                return res.status(500).json({ message: "Erreur lors de la mise à jour du stock des équipements" });
                                             });
                                         }
 
-                                        connection.query(
-                                            addAdherentReservationSql,
-                                            [id_adherent, id_reservation],
-                                            (err) => {
-                                                if (err) {
-                                                    return connection.rollback(() => {
-                                                        connection.release();
-                                                        return res.status(500).json({ message: "Erreur lors de l'ajout à la réservation" });
-                                                    });
-                                                }
-
-                                                connection.commit((err) => {
-                                                    if (err) {
-                                                        return connection.rollback(() => {
-                                                            connection.release();
-                                                            return res.status(500).json({ message: "Erreur lors de la validation de la réservation" });
-                                                        });
-                                                    }
-
+                                        connection.commit((err) => {
+                                            if (err) {
+                                                return connection.rollback(() => {
                                                     connection.release();
-                                                    return res.json({
-                                                        success: true,
-                                                        message: "Réservation créée avec succès",
-                                                        numero_reservation: numero_reservation,
-                                                        id_reservation: id_reservation,
-                                                        id_match: matchResult.insertId
-                                                    });
+                                                    return res.status(500).json({ message: "Erreur lors de la validation de la réservation" });
                                                 });
                                             }
-                                        );
-                                    }
-                                );
-                            }
-                        );
+
+                                            connection.release();
+                                            return res.json({
+                                                success: true,
+                                                message: "Réservation créée avec succès",
+                                                numero_reservation: numero_reservation,
+                                                id_reservation: id_reservation
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
                     });
                 });
             });
         });
     });
 };
+
+
