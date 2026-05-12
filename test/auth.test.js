@@ -178,7 +178,8 @@ describe('Auth Controller Tests', () => {
                 expect(res.json).toHaveBeenCalledWith({
                     message: 'Adherent ajouté avec succès !',
                     id: userId,
-                    role: 'utilisateur'
+                    role: 'utilisateur',
+                    token: token
                 });
                 done();
             }, 100);
@@ -349,7 +350,8 @@ describe('Auth Controller Tests', () => {
                 expect(res.json).toHaveBeenCalledWith({
                     message: 'Vous êtes connecté !',
                     role: userFromDB.role,
-                    id: userFromDB.id_adherent
+                    id: userFromDB.id_adherent,
+                    token: token
                 });
                 done();
             }, 100);
