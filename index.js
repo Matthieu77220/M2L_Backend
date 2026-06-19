@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import "dotenv/config";
 
 // Routes
 import authRoutes from "./routes/auth.js";
@@ -25,16 +26,26 @@ const app = express();
 app.use(cookieParser());
 
 // ----- CORS -----
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "http://localhost:8080",
+  ...(process.env.CORS_ORIGINS ?? "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+];
+
 const corsOptions = {
   origin: (origin, callback) => {
     // autorise les requêtes sans origin
     if (!origin) return callback(null, true);
 
-    if (origin.startsWith('http://localhost')) {
+    if (origin.startsWith("http://localhost") || allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
 
-    return callback(new Error('Not allowed by CORS'));
+    return callback(new Error(`Not allowed by CORS: ${origin}`));
   },
   credentials: true,
 };
