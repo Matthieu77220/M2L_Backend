@@ -30,10 +30,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:5173",
   "http://localhost:8080",
-  ...(process.env.CORS_ORIGINS ?? "")
-    .split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean),
+  "https://m2-i-site-j4p0ovrvg-matthieu77220s-projects.vercel.app"
 ];
 
 const corsOptions = {
