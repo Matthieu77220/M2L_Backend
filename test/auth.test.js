@@ -206,7 +206,7 @@ describe('Auth Controller Tests', () => {
 
  
             expect(res.status).toHaveBeenCalledWith(500);
-            expect(res.send).toHaveBeenCalledWith('Erreur lors de las vérification des infos');
+            expect(res.send).toHaveBeenCalledWith('Erreur lors de la vérification des infos');
         });
     });
 

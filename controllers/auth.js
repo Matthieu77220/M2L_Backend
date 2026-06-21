@@ -25,7 +25,8 @@ export const inscription = (req, res) => {
     db.query(sql, [email], (err, results) => {
 
         if (err) {
-            return res.status(500).send("Erreur lors de las vérification des infos")
+            console.error("Erreur SQL lors de la vérification de l'email :", err)
+            return res.status(500).send("Erreur lors de la vérification des infos")
         }
 
         if (results.length > 0) {
