@@ -46,7 +46,7 @@ export const acheterAbonnement = (req, res) => {
     return res.status(404).json({ message: "Abonnement introuvable" });
   }
 
-  const sql = "UPDATE ADHERENT SET type_abonnement = ? WHERE id_adherent = ?;";
+  const sql = "UPDATE adherent SET type_abonnement = ? WHERE id_adherent = ?;";
 
   db.query(sql, [abonnement.nom, id_adherent], (err, result) => {
     if (err) {
@@ -78,7 +78,7 @@ export const choisirAbonnement = (req, res) => {
       .json({ message: "id_adherent et abonnement sont requis" });
   }
 
-  const sql = "UPDATE ADHERENT SET abonnement = ? WHERE id_adherent = ?;";
+  const sql = "UPDATE adherent SET abonnement = ? WHERE id_adherent = ?;";
 
   db.query(sql, [abonnement, id_adherent], (err, result) => {
     if (err) {
@@ -104,7 +104,7 @@ export const getAbonnementUtilisateur = (req, res) => {
   const { id_adherent } = req.params;
 
   const sql =
-    "SELECT id_adherent, abonnement FROM ADHERENT WHERE id_adherent = ?;";
+    "SELECT id_adherent, abonnement FROM adherent WHERE id_adherent = ?;";
 
   db.query(sql, [id_adherent], (err, results) => {
     if (err) {

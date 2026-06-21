@@ -15,7 +15,7 @@ export const getAllUsers = (req, res) => {
                 debut_adhesion, 
                 fin_adhesion, 
                 type_abonnement 
-             FROM ADHERENT 
+             FROM adherent 
              ORDER BY id_adherent ASC`
 
         db.query(sql, (err, result) => {
@@ -76,7 +76,7 @@ export const createUser = (req, res) => {
     }
 
 
-    const checkEmailSql = 'SELECT id_adherent FROM ADHERENT WHERE email = ?';
+    const checkEmailSql = 'SELECT id_adherent FROM adherent WHERE email = ?';
 
     db.query(checkEmailSql, [email], (err, existingUsers) => {
         if (err) {
@@ -96,7 +96,7 @@ export const createUser = (req, res) => {
             }
 
 
-            const insertSql = `INSERT INTO ADHERENT 
+            const insertSql = `INSERT INTO adherent 
                 (role, prenom, nom, email, telephone, date_naissance, mot_de_passe, montant_cotisation, debut_adhesion, fin_adhesion, type_abonnement) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
@@ -152,7 +152,7 @@ export const updateUser = (req, res) => {
 
     try {
 
-        const checkUserSql = 'SELECT id_adherent, role FROM ADHERENT WHERE id_adherent = ?';
+        const checkUserSql = 'SELECT id_adherent, role FROM adherent WHERE id_adherent = ?';
 
         db.query(checkUserSql, [id], (err, users) => {
             if (err) {
@@ -232,7 +232,7 @@ export const updateUser = (req, res) => {
 
                 updateValues.push(id);
 
-                const updateSql = `UPDATE ADHERENT SET ${updateFields.join(', ')} WHERE id_adherent = ?`;
+                const updateSql = `UPDATE adherent SET ${updateFields.join(', ')} WHERE id_adherent = ?`;
 
                 db.query(updateSql, updateValues, (err, result) => {
                     if (err) {
@@ -246,7 +246,7 @@ export const updateUser = (req, res) => {
 
 
             if (email) {
-                const checkEmailSql = 'SELECT id_adherent FROM ADHERENT WHERE email = ? AND id_adherent != ?';
+                const checkEmailSql = 'SELECT id_adherent FROM adherent WHERE email = ? AND id_adherent != ?';
 
                 db.query(checkEmailSql, [email, id], (err, existingUsers) => {
                     if (err) {
@@ -321,7 +321,7 @@ export const deleteUser = (req, res) => {
         return res.status(403).json({ message: "Vous ne pouvez pas supprimer votre propre compte" });
     }
 
-    const checkUserSql = "SELECT role FROM ADHERENT WHERE id_adherent = ?";
+    const checkUserSql = "SELECT role FROM adherent WHERE id_adherent = ?";
     db.query(checkUserSql, [id], (err, users) => {
         if (err) return res.status(500).json({ message: "Erreur serveur" });
         if (users.length === 0) return res.status(404).json({ message: "Utilisateur non trouvé" });
@@ -370,7 +370,7 @@ export const deleteUser = (req, res) => {
                             if (err) return res.status(500).json({ message: "Erreur serveur (licence)" });
 
                             //supprimer l’adhérent
-                            const deleteSql = "DELETE FROM ADHERENT WHERE id_adherent = ?";
+                            const deleteSql = "DELETE FROM adherent WHERE id_adherent = ?";
                             db.query(deleteSql, [id], (err, result) => {
                                 if (err) return res.status(500).json({ message: "Erreur serveur (adherent)" });
                                 if (result.affectedRows === 0) return res.status(404).json({ message: "Utilisateur non trouvé" });
