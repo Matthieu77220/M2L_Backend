@@ -31,7 +31,11 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:8080",
   "https://m2-i-site-j4p0ovrvg-matthieu77220s-projects.vercel.app",
-  "https://m2-i-site-web-pi.vercel.app"
+  "https://m2-i-site-web-pi.vercel.app",
+  ...(process.env.ALLOWED_ORIGINS || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean)
 ];
 
 const corsOptions = {
@@ -74,6 +78,8 @@ app.get("/", (req, res) => {
   res.json("hello World");
 });
 
-app.listen(3000, () => {
-  console.log("✅ Serveur lancé : http://localhost:3000");
+const port = Number(process.env.PORT || 3000);
+
+app.listen(port, "0.0.0.0", () => {
+  console.log(`✅ Serveur lancé sur le port ${port}`);
 });

@@ -158,6 +158,9 @@ describe('Auth Controller Tests', () => {
                 else if (queryCount === 2) {
                     callback(null, { insertId: userId });
                 }
+                else if (queryCount === 3) {
+                    callback(null, { affectedRows: 1 });
+                }
             });
 
         

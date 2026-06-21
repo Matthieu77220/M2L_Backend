@@ -36,7 +36,7 @@ export const inscription = (req, res) => {
         // --- Hachage du mot de passe ---
         bcrypt.hash(motDePasse, 10, (err, hash) => {
             if (err) {
-                res.status(500).send("Erreur lors du hashage du motDePasse")
+                return res.status(500).send("Erreur lors du hashage du motDePasse")
             } else {
 
                 // --- Préparation de la requete préparée pour Créer le compte ---
@@ -45,7 +45,7 @@ export const inscription = (req, res) => {
                 db.query(sqlInscription, ["utilisateur", prenom, nom, email, telephone, dateDeNaissance, hash], (err, match) => {
 
                     if (err) {
-                        res.status(500).send("Erreur lors de l'ajout de l'adherent dans la Base De Données")
+                        return res.status(500).send("Erreur lors de l'ajout de l'adherent dans la Base De Données")
                     }
 
                     // Ajout du numero de l'adherent dans la table licence générer aléatoirement
@@ -67,32 +67,32 @@ export const inscription = (req, res) => {
                             return res.status(500).send("Erreur lors de l'ajout de la licence.")
                         }
                         console.log("Licence ajoutée avec succès.")
-                    })
 
-                    // On récupère dans l'object match la clé insertId | on ne peut pas faire match[0].id_adherent car seulement pour les SELECT
-                    const user = match.insertId
+                        // On récupère dans l'object match la clé insertId | on ne peut pas faire match[0].id_adherent car seulement pour les SELECT
+                        const user = match.insertId
 
-                    // --- Création du token ---
-                    const token = jwt.sign(
-                        { id: user, role: "utilisateur" },
-                        process.env.secretKey,
-                        { expiresIn: "24h" }
-                    )
+                        // --- Création du token ---
+                        const token = jwt.sign(
+                            { id: user, role: "utilisateur" },
+                            process.env.secretKey,
+                            { expiresIn: "24h" }
+                        )
 
-                    // --- Cookie sécurisé ---
-                    res.cookie("token", token, {
-                        httpOnly: true,
-                        secure: true,
-                        sameSite: "none",
-                        maxAge: 24 * 60 * 60 * 1000,// 24h
-                    })         
+                        // --- Cookie sécurisé ---
+                        res.cookie("token", token, {
+                            httpOnly: true,
+                            secure: true,
+                            sameSite: "none",
+                            maxAge: 24 * 60 * 60 * 1000,// 24h
+                        })
 
-                    // Renvoie l'ID et le rôle pour que le frontend puisse les stocker
-                    return res.json({
-                        message: "Adherent ajouté avec succès !",
-                        id: user,
-                        role: "utilisateur",
-                        token: token
+                        // Renvoie l'ID et le rôle pour que le frontend puisse les stocker
+                        return res.json({
+                            message: "Adherent ajouté avec succès !",
+                            id: user,
+                            role: "utilisateur",
+                            token: token
+                        })
                     })
                 })
             }
@@ -306,7 +306,7 @@ export const modifierMotDePasse = (req, res) => {
                 // --- Hachage du mot de passe ---
                 bcrypt.hash(newConfirmMotDePasse, 10, (err, hash) => {
                     if (err) {
-                        res.status(500).send("Erreur lors du hashage du mot de passe")
+                        return res.status(500).send("Erreur lors du hashage du mot de passe")
                     } else {
 
                         // --- Préparation de la requete préparée pour Modifier le MDP ---
@@ -315,7 +315,7 @@ export const modifierMotDePasse = (req, res) => {
                         db.query(sqlAjouteMotDePasse, [hash, email], (err, results) => {
 
                             if (err) {
-                                res.status(500).send("Erreur lors de la mise à jour du mot de passe")
+                                return res.status(500).send("Erreur lors de la mise à jour du mot de passe")
                             }
 
                             return res.send("Modification réussite avec succès.")
