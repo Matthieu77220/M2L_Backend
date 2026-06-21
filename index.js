@@ -30,7 +30,8 @@ const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:5173",
   "http://localhost:8080",
-  "https://m2-i-site-j4p0ovrvg-matthieu77220s-projects.vercel.app"
+  "https://m2-i-site-j4p0ovrvg-matthieu77220s-projects.vercel.app",
+  "https://m2-i-site-web-pi.vercel.app"
 ];
 
 const corsOptions = {
