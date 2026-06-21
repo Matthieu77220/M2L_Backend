@@ -172,7 +172,8 @@ describe('Auth Controller Tests', () => {
                 );
                 expect(res.cookie).toHaveBeenCalledWith('token', token, {
                     httpOnly: true,
-                    secure: false,
+                    secure: true,
+                    sameSite: 'none',
                     maxAge: 24 * 60 * 60 * 1000
                 });
                 expect(res.json).toHaveBeenCalledWith({
@@ -344,7 +345,8 @@ describe('Auth Controller Tests', () => {
                 );
                 expect(res.cookie).toHaveBeenCalledWith('token', token, {
                     httpOnly: true,
-                    secure: false,
+                    secure: true,
+                    sameSite: 'none',
                     maxAge: 24 * 60 * 60 * 1000
                 });
                 expect(res.json).toHaveBeenCalledWith({

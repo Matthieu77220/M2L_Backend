@@ -82,7 +82,8 @@ export const inscription = (req, res) => {
                     // --- Cookie sécurisé ---
                     res.cookie("token", token, {
                         httpOnly: true,
-                        secure: false,
+                        secure: true,
+                        sameSite: "none",
                         maxAge: 24 * 60 * 60 * 1000,// 24h
                     })         
 
@@ -149,7 +150,8 @@ export const connexion = (req, res) => {
             // --- Cookie sécurisé ---
             res.cookie("token", token, {
                 httpOnly: true,
-                secure: false,
+                secure: true,
+                sameSite: "none",
                 maxAge: 24 * 60 * 60 * 1000,//24h
 
             });
@@ -168,7 +170,8 @@ export const connexion = (req, res) => {
 export const deconnexion = (req, res) => {
     res.clearCookie("token", {
         httpOnly: true,
-        secure: true
+        secure: true,
+        sameSite: "none"
     })
     res.send("Déconnexion")
 }
@@ -245,7 +248,8 @@ export const suppressionCompte = (req, res) => {
                                 console.log("Adhérent supprimé avec succès.")
                                 res.clearCookie("token", {
                                     httpOnly: true,
-                                    secure: false
+                                    secure: true,
+                                    sameSite: "none"
                                 })
 
                                 return res.send("User supprimé avec succès.")
