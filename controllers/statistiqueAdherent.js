@@ -6,17 +6,26 @@ export const statistique = (req, res) => {
 
     const id = req.user.id
 
-    const sql = `SELECT 
-                    COUNT(m.id_match)    AS nombreMatch,
-                    SUM(m.nb_victoires)  AS victoire,
-                    SUM(m.nb_defaites)   AS defaite,
-                    SUM(m.nb_egalites)   AS egalite
+    const sql = `SELECT
+                    COUNT(DISTINCT m.id_match) AS nombreMatch,
+                    COALESCE(SUM(CASE
+                        WHEN s.id_score IS NOT NULL AND
+                             ((m.id_adherent_1 = ? AND s.nb_but_adherent_1 > s.nb_but_adherent_2) OR
+                              (m.id_adherent_2 = ? AND s.nb_but_adherent_2 > s.nb_but_adherent_1))
+                        THEN 1 ELSE 0 END), 0) AS victoire,
+                    COALESCE(SUM(CASE
+                        WHEN s.id_score IS NOT NULL AND
+                             ((m.id_adherent_1 = ? AND s.nb_but_adherent_1 < s.nb_but_adherent_2) OR
+                              (m.id_adherent_2 = ? AND s.nb_but_adherent_2 < s.nb_but_adherent_1))
+                        THEN 1 ELSE 0 END), 0) AS defaite,
+                    COALESCE(SUM(CASE
+                        WHEN s.id_score IS NOT NULL AND s.nb_but_adherent_1 = s.nb_but_adherent_2
+                        THEN 1 ELSE 0 END), 0) AS egalite
                  FROM matchs AS m
-                 JOIN reservation r          ON r.id_reservation  = m.id_reservation
-                 JOIN adherent_reservation ad ON ad.id_reservation = r.id_reservation
-                 WHERE ad.id_adherent = ?`
+                 LEFT JOIN score AS s ON s.id_match = m.id_match
+                 WHERE m.id_adherent_1 = ? OR m.id_adherent_2 = ?`
 
-    db.query(sql, [id], (err, results) => {
+    db.query(sql, [id, id, id, id, id, id], (err, results) => {
         if (err) {
             return res.status(500).json({ message: "Erreur lors de l'exécution de la requête SQL." })
         }
@@ -29,22 +38,25 @@ export const visualisationMatch = (req, res) => {
 
     const id = req.user.id
 
-    const sql = `SELECT 
+    const sql = `SELECT
                     m.id_match,
-                    r.date_reservation,
-                    m.score,
-                    m.status,
-                    m.nb_victoires,
-                    m.nb_defaites,
-                    m.nb_egalites,
-                    m.nb_buts
-                 FROM reservation r
-                 JOIN matchs m               ON m.id_reservation  = r.id_reservation
-                 JOIN adherent_reservation ad ON r.id_reservation = ad.id_reservation
-                 WHERE ad.id_adherent = ?
-                 ORDER BY r.date_reservation DESC`
+                    m.date_match,
+                    m.id_adherent_1,
+                    a1.prenom AS prenom_adherent_1,
+                    a1.nom AS nom_adherent_1,
+                    m.id_adherent_2,
+                    a2.prenom AS prenom_adherent_2,
+                    a2.nom AS nom_adherent_2,
+                    s.nb_but_adherent_1,
+                    s.nb_but_adherent_2
+                 FROM matchs AS m
+                 JOIN adherent AS a1 ON a1.id_adherent = m.id_adherent_1
+                 JOIN adherent AS a2 ON a2.id_adherent = m.id_adherent_2
+                 LEFT JOIN score AS s ON s.id_match = m.id_match
+                 WHERE m.id_adherent_1 = ? OR m.id_adherent_2 = ?
+                 ORDER BY m.date_match DESC`
 
-    db.query(sql, [id], (err, results) => {
+    db.query(sql, [id, id], (err, results) => {
         if (err) {
             return res.status(500).json({ message: "Erreur lors de l'exécution de la requête SQL." })
         }

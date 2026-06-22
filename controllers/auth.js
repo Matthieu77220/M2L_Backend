@@ -45,6 +45,7 @@ export const inscription = (req, res) => {
                 db.query(sqlInscription, ["utilisateur", prenom, nom, email, telephone, dateDeNaissance, hash], (err, match) => {
 
                     if (err) {
+                        console.error("Erreur SQL lors de la création de l'adhérent :", err)
                         return res.status(500).send("Erreur lors de l'ajout de l'adherent dans la Base De Données")
                     }
 
