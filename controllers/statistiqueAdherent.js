@@ -66,81 +66,108 @@ export const visualisationMatch = (req, res) => {
 
 // ----- Mettre le score après un match ----- //
 export const mettreScore = (req, res) => {
+    const idAdherent = Number(req.user.id)
+    const idMatch = Number(req.body.id_match)
+    const monScore = Number(req.body.mon_score)
+    const scoreAdversaire = Number(req.body.score_adversaire)
 
-    const id = req.user.id
-    const { id_match, score, score_adversaire, nb_buts } = req.body
-
-    // --- Validation des champs obligatoires ---
-    if (
-        id_match          == null ||
-        score             == null ||
-        score_adversaire  == null ||
-        nb_buts           == null
-    ) {
-        return res.status(400).json({ message: "Tous les champs sont obligatoires." })
+    if (!Number.isInteger(idMatch) || idMatch <= 0 ||
+        !Number.isInteger(monScore) || monScore < 0 ||
+        !Number.isInteger(scoreAdversaire) || scoreAdversaire < 0) {
+        return res.status(400).json({
+            message: "id_match, mon_score et score_adversaire doivent etre des entiers positifs ou nuls."
+        })
     }
 
-    const scoreInt    = parseInt(score,            10)
-    const advInt      = parseInt(score_adversaire, 10)
-    const butsInt     = parseInt(nb_buts,          10)
-
-    if (isNaN(scoreInt) || isNaN(advInt) || isNaN(butsInt)) {
-        return res.status(400).json({ message: "Les scores et le nombre de buts doivent être des nombres." })
-    }
-
-    // --- Calcul victoire / défaite / égalité ---
-    const nb_victoires = scoreInt > advInt  ? 1 : 0
-    const nb_defaites  = scoreInt < advInt  ? 1 : 0
-    const nb_egalites  = scoreInt === advInt ? 1 : 0
-
-    const scoreStr = `${scoreInt}-${advInt}`
-    const status   = "terminé"
-
-    // --- Vérification que le match appartient bien à l'adhérent ---
-    const sqlVerif = `SELECT m.id_match
-                      FROM matchs m
-                      JOIN adherent_reservation ad ON ad.id_reservation = m.id_reservation
-                      WHERE m.id_match     = ?
-                        AND ad.id_adherent = ?
+    // Le filtre sur l'adherent interdit de saisir le score d'un autre match.
+    const sqlMatch = `SELECT
+                        id_match,
+                        id_adherent_1,
+                        id_adherent_2,
+                        date_match
+                      FROM matchs
+                      WHERE id_match = ?
+                        AND (id_adherent_1 = ? OR id_adherent_2 = ?)
                       LIMIT 1`
 
-    db.query(sqlVerif, [id_match, id], (errVerif, rowsVerif) => {
-        if (errVerif) {
-            return res.status(500).json({ message: "Erreur lors de la vérification du match." })
-        }
-        if (rowsVerif.length === 0) {
-            return res.status(403).json({ message: "Match introuvable ou accès non autorisé." })
+    db.query(sqlMatch, [idMatch, idAdherent, idAdherent], (matchErr, matchRows) => {
+        if (matchErr) {
+            console.error("Erreur lors de la verification du match:", matchErr)
+            return res.status(500).json({ message: "Erreur serveur." })
         }
 
-        // --- Mise à jour du score ---
-        const sqlUpdate = `UPDATE matchs
-                           SET score        = ?,
-                               nb_victoires = ?,
-                               nb_defaites  = ?,
-                               nb_egalites  = ?,
-                               nb_buts      = ?,
-                               status       = ?
-                           WHERE id_match   = ?`
+        if (matchRows.length === 0) {
+            return res.status(403).json({
+                message: "Match introuvable ou vous ne participez pas a ce match."
+            })
+        }
+
+        const match = matchRows[0]
+        const dateMatch = match.date_match instanceof Date
+            ? new Date(match.date_match)
+            : new Date(`${match.date_match}T00:00:00`)
+        const aujourdHui = new Date()
+        dateMatch.setHours(0, 0, 0, 0)
+        aujourdHui.setHours(0, 0, 0, 0)
+
+        if (dateMatch > aujourdHui) {
+            return res.status(400).json({
+                message: "Le score ne peut etre saisi qu'apres la date du match."
+            })
+        }
+
+        // La table score suit toujours l'ordre defini dans la table matchs.
+        const estAdherent1 = Number(match.id_adherent_1) === idAdherent
+        const butsAdherent1 = estAdherent1 ? monScore : scoreAdversaire
+        const butsAdherent2 = estAdherent1 ? scoreAdversaire : monScore
+
+        const sqlScore = `INSERT INTO score
+                            (id_match, nb_but_adherent_1, nb_but_adherent_2)
+                          VALUES (?, ?, ?)
+                          ON DUPLICATE KEY UPDATE
+                            nb_but_adherent_1 = VALUES(nb_but_adherent_1),
+                            nb_but_adherent_2 = VALUES(nb_but_adherent_2)`
 
         db.query(
-            sqlUpdate,
-            [scoreStr, nb_victoires, nb_defaites, nb_egalites, butsInt, status, id_match],
-            (errUpdate, resultsUpdate) => {
-                if (errUpdate) {
-                    return res.status(500).json({ message: "Erreur lors de la mise à jour du score." })
+            sqlScore,
+            [idMatch, butsAdherent1, butsAdherent2],
+            (scoreErr) => {
+                if (scoreErr) {
+                    console.error("Erreur lors de l'enregistrement du score:", scoreErr)
+                    return res.status(500).json({ message: "Erreur serveur." })
                 }
-                if (resultsUpdate.affectedRows === 0) {
-                    return res.status(404).json({ message: "Match non trouvé." })
-                }
-                return res.status(200).json({
-                    message      : "Score mis à jour avec succès.",
-                    score        : scoreStr,
-                    nb_victoires,
-                    nb_defaites,
-                    nb_egalites,
-                    nb_buts      : butsInt,
-                    status,
-                })
+
+                // On recalcule les victoires des deux participants. Cela reste
+                // correct meme lorsqu'un score existant est ensuite modifie.
+                const sqlVictoires = `UPDATE adherent AS a
+                                      SET nombre_victoires = (
+                                          SELECT COUNT(*)
+                                          FROM matchs AS m
+                                          INNER JOIN score AS s ON s.id_match = m.id_match
+                                          WHERE (m.id_adherent_1 = a.id_adherent
+                                                 AND s.nb_but_adherent_1 > s.nb_but_adherent_2)
+                                             OR (m.id_adherent_2 = a.id_adherent
+                                                 AND s.nb_but_adherent_2 > s.nb_but_adherent_1)
+                                      )
+                                      WHERE a.id_adherent IN (?, ?)`
+
+                db.query(
+                    sqlVictoires,
+                    [match.id_adherent_1, match.id_adherent_2],
+                    (victoiresErr) => {
+                        if (victoiresErr) {
+                            console.error("Erreur lors de la mise a jour des victoires:", victoiresErr)
+                            return res.status(500).json({ message: "Erreur serveur." })
+                        }
+
+                        return res.status(200).json({
+                            message: "Score enregistre avec succes.",
+                            id_match: idMatch,
+                            nb_but_adherent_1: butsAdherent1,
+                            nb_but_adherent_2: butsAdherent2
+                        })
+                    }
+                )
             }
         )
     })
