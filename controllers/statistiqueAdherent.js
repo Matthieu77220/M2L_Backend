@@ -8,24 +8,15 @@ export const statistique = (req, res) => {
 
     const sql = `SELECT
                     COUNT(DISTINCT m.id_match) AS nombreMatch,
-                    COALESCE(SUM(CASE
-                        WHEN s.id_score IS NOT NULL AND
-                             ((m.id_adherent_1 = ? AND s.nb_but_adherent_1 > s.nb_but_adherent_2) OR
-                              (m.id_adherent_2 = ? AND s.nb_but_adherent_2 > s.nb_but_adherent_1))
-                        THEN 1 ELSE 0 END), 0) AS victoire,
-                    COALESCE(SUM(CASE
-                        WHEN s.id_score IS NOT NULL AND
-                             ((m.id_adherent_1 = ? AND s.nb_but_adherent_1 < s.nb_but_adherent_2) OR
-                              (m.id_adherent_2 = ? AND s.nb_but_adherent_2 < s.nb_but_adherent_1))
-                        THEN 1 ELSE 0 END), 0) AS defaite,
-                    COALESCE(SUM(CASE
-                        WHEN s.id_score IS NOT NULL AND s.nb_but_adherent_1 = s.nb_but_adherent_2
-                        THEN 1 ELSE 0 END), 0) AS egalite
+                    COALESCE(SUM(m.nb_victoires), 0) AS victoire,
+                    COALESCE(SUM(m.nb_defaites), 0) AS defaite,
+                    COALESCE(SUM(m.nb_egalites), 0) AS egalite
                  FROM matchs AS m
-                 LEFT JOIN score AS s ON s.id_match = m.id_match
-                 WHERE m.id_adherent_1 = ? OR m.id_adherent_2 = ?`
+                 INNER JOIN reservation AS r ON r.id_reservation = m.id_reservation
+                 INNER JOIN adherent_reservation AS ar ON ar.id_reservation = r.id_reservation
+                 WHERE ar.id_adherent = ?`
 
-    db.query(sql, [id, id, id, id, id, id], (err, results) => {
+    db.query(sql, [id], (err, results) => {
         if (err) {
             return res.status(500).json({ message: "Erreur lors de l'exécution de la requête SQL." })
         }
@@ -40,23 +31,28 @@ export const visualisationMatch = (req, res) => {
 
     const sql = `SELECT
                     m.id_match,
-                    m.date_match,
-                    m.id_adherent_1,
-                    a1.prenom AS prenom_adherent_1,
-                    a1.nom AS nom_adherent_1,
-                    m.id_adherent_2,
-                    a2.prenom AS prenom_adherent_2,
-                    a2.nom AS nom_adherent_2,
-                    s.nb_but_adherent_1,
-                    s.nb_but_adherent_2
+                    m.id_reservation,
+                    m.score,
+                    m.status,
+                    m.nb_buts,
+                    m.nb_victoires,
+                    m.nb_egalites,
+                    m.nb_defaites,
+                    r.numero_reservation,
+                    r.date_reservation,
+                    r.heure_debut,
+                    r.heure_fin,
+                    t.adresse AS terrain,
+                    c.nom AS club
                  FROM matchs AS m
-                 JOIN adherent AS a1 ON a1.id_adherent = m.id_adherent_1
-                 JOIN adherent AS a2 ON a2.id_adherent = m.id_adherent_2
-                 LEFT JOIN score AS s ON s.id_match = m.id_match
-                 WHERE m.id_adherent_1 = ? OR m.id_adherent_2 = ?
-                 ORDER BY m.date_match DESC`
+                 INNER JOIN reservation AS r ON r.id_reservation = m.id_reservation
+                 INNER JOIN adherent_reservation AS ar ON ar.id_reservation = r.id_reservation
+                 INNER JOIN terrain AS t ON t.id_terrain = r.id_terrain
+                 INNER JOIN club AS c ON c.id_club = t.id_club
+                 WHERE ar.id_adherent = ?
+                 ORDER BY r.date_reservation DESC, r.heure_debut DESC`
 
-    db.query(sql, [id, id], (err, results) => {
+    db.query(sql, [id], (err, results) => {
         if (err) {
             return res.status(500).json({ message: "Erreur lors de l'exécution de la requête SQL." })
         }
@@ -64,111 +60,99 @@ export const visualisationMatch = (req, res) => {
     })
 }
 
-// ----- Mettre le score après un match ----- //
+// ----- Mettre le score d'un match lié à une réservation ----- //
 export const mettreScore = (req, res) => {
-    const idAdherent = Number(req.user.id)
-    const idMatch = Number(req.body.id_match)
-    const monScore = Number(req.body.mon_score)
-    const scoreAdversaire = Number(req.body.score_adversaire)
+    const idAdherent = req.user.id
+    const { numero_reservation, score, nb_buts } = req.body
 
-    if (!Number.isInteger(idMatch) || idMatch <= 0 ||
-        !Number.isInteger(monScore) || monScore < 0 ||
-        !Number.isInteger(scoreAdversaire) || scoreAdversaire < 0) {
+    if (!numero_reservation || !score || nb_buts === undefined) {
         return res.status(400).json({
-            message: "id_match, mon_score et score_adversaire doivent etre des entiers positifs ou nuls."
+            message: "numero_reservation, score et nb_buts sont obligatoires"
         })
     }
 
-    // Le filtre sur l'adherent interdit de saisir le score d'un autre match.
-    const sqlMatch = `SELECT
-                        id_match,
-                        id_adherent_1,
-                        id_adherent_2,
-                        date_match
-                      FROM matchs
-                      WHERE id_match = ?
-                        AND (id_adherent_1 = ? OR id_adherent_2 = ?)
-                      LIMIT 1`
+    const nbButs = Number(nb_buts)
 
-    db.query(sqlMatch, [idMatch, idAdherent, idAdherent], (matchErr, matchRows) => {
-        if (matchErr) {
-            console.error("Erreur lors de la verification du match:", matchErr)
-            return res.status(500).json({ message: "Erreur serveur." })
-        }
+    if (!Number.isInteger(nbButs) || nbButs < 0) {
+        return res.status(400).json({
+            message: "nb_buts doit etre un entier positif ou nul"
+        })
+    }
 
-        if (matchRows.length === 0) {
-            return res.status(403).json({
-                message: "Match introuvable ou vous ne participez pas a ce match."
+    const reservationSql = `SELECT
+                                r.id_reservation
+                            FROM reservation AS r
+                            INNER JOIN adherent_reservation AS ar
+                                ON ar.id_reservation = r.id_reservation
+                            WHERE r.numero_reservation = ?
+                              AND ar.id_adherent = ?
+                            LIMIT 1`
+
+    db.query(reservationSql, [numero_reservation, idAdherent], (reservationErr, reservationRows) => {
+        if (reservationErr) {
+            return res.status(500).json({
+                message: "Erreur lors de la verification de la reservation"
             })
         }
 
-        const match = matchRows[0]
-        const dateMatch = match.date_match instanceof Date
-            ? new Date(match.date_match)
-            : new Date(`${match.date_match}T00:00:00`)
-        const aujourdHui = new Date()
-        dateMatch.setHours(0, 0, 0, 0)
-        aujourdHui.setHours(0, 0, 0, 0)
-
-        if (dateMatch > aujourdHui) {
-            return res.status(400).json({
-                message: "Le score ne peut etre saisi qu'apres la date du match."
+        if (reservationRows.length === 0) {
+            return res.status(404).json({
+                message: "Reservation introuvable pour cet adherent"
             })
         }
 
-        // La table score suit toujours l'ordre defini dans la table matchs.
-        const estAdherent1 = Number(match.id_adherent_1) === idAdherent
-        const butsAdherent1 = estAdherent1 ? monScore : scoreAdversaire
-        const butsAdherent2 = estAdherent1 ? scoreAdversaire : monScore
+        const idReservation = reservationRows[0].id_reservation
 
-        const sqlScore = `INSERT INTO score
-                            (id_match, nb_but_adherent_1, nb_but_adherent_2)
-                          VALUES (?, ?, ?)
-                          ON DUPLICATE KEY UPDATE
-                            nb_but_adherent_1 = VALUES(nb_but_adherent_1),
-                            nb_but_adherent_2 = VALUES(nb_but_adherent_2)`
+        const existingMatchSql = `SELECT
+                                    id_match
+                                  FROM matchs
+                                  WHERE id_reservation = ?
+                                  LIMIT 1`
 
-        db.query(
-            sqlScore,
-            [idMatch, butsAdherent1, butsAdherent2],
-            (scoreErr) => {
-                if (scoreErr) {
-                    console.error("Erreur lors de l'enregistrement du score:", scoreErr)
-                    return res.status(500).json({ message: "Erreur serveur." })
-                }
+        db.query(existingMatchSql, [idReservation], (matchErr, matchRows) => {
+            if (matchErr) {
+                return res.status(500).json({
+                    message: "Erreur lors de la verification du match"
+                })
+            }
 
-                // On recalcule les victoires des deux participants. Cela reste
-                // correct meme lorsqu'un score existant est ensuite modifie.
-                const sqlVictoires = `UPDATE adherent AS a
-                                      SET nombre_victoires = (
-                                          SELECT COUNT(*)
-                                          FROM matchs AS m
-                                          INNER JOIN score AS s ON s.id_match = m.id_match
-                                          WHERE (m.id_adherent_1 = a.id_adherent
-                                                 AND s.nb_but_adherent_1 > s.nb_but_adherent_2)
-                                             OR (m.id_adherent_2 = a.id_adherent
-                                                 AND s.nb_but_adherent_2 > s.nb_but_adherent_1)
-                                      )
-                                      WHERE a.id_adherent IN (?, ?)`
+            if (matchRows.length > 0) {
+                const updateSql = `UPDATE matchs
+                                   SET score = ?,
+                                       nb_buts = ?,
+                                       status = 'termine'
+                                   WHERE id_match = ?`
 
-                db.query(
-                    sqlVictoires,
-                    [match.id_adherent_1, match.id_adherent_2],
-                    (victoiresErr) => {
-                        if (victoiresErr) {
-                            console.error("Erreur lors de la mise a jour des victoires:", victoiresErr)
-                            return res.status(500).json({ message: "Erreur serveur." })
-                        }
-
-                        return res.status(200).json({
-                            message: "Score enregistre avec succes.",
-                            id_match: idMatch,
-                            nb_but_adherent_1: butsAdherent1,
-                            nb_but_adherent_2: butsAdherent2
+                return db.query(updateSql, [score, nbButs, matchRows[0].id_match], (updateErr) => {
+                    if (updateErr) {
+                        return res.status(500).json({
+                            message: "Erreur lors de la mise a jour du score"
                         })
                     }
-                )
+
+                    return res.status(200).json({
+                        success: true,
+                        message: "Score mis a jour"
+                    })
+                })
             }
-        )
+
+            const insertSql = `INSERT INTO matchs
+                                (id_reservation, score, status, nb_buts, nb_victoires, nb_egalites, nb_defaites)
+                               VALUES (?, ?, 'termine', ?, 0, 0, 0)`
+
+            return db.query(insertSql, [idReservation, score, nbButs], (insertErr) => {
+                if (insertErr) {
+                    return res.status(500).json({
+                        message: "Erreur lors de l'enregistrement du score"
+                    })
+                }
+
+                return res.status(200).json({
+                    success: true,
+                    message: "Score enregistre"
+                })
+            })
+        })
     })
 }

@@ -4,9 +4,7 @@ import {
     createUser,
     updateUser,
     deleteUser,
-    getStats,
-    getMatchAdherents,
-    createMatch
+    getStats
 } from '../controllers/admin.js';
 import isAdmin from '../middleware/isAdmin.js';
 
@@ -18,7 +16,5 @@ router.post('/createUser', isAdmin, createUser);
 router.put('/updateUser/:id', isAdmin, updateUser);
 router.delete('/deleteUser/:id', isAdmin, deleteUser);
 router.get('/stats', isAdmin, getStats);
-router.get('/matchs/adherents', isAdmin, getMatchAdherents);
-router.post('/matchs', isAdmin, createMatch);
 
 export default router;
